@@ -9,22 +9,15 @@ namespace Rishi.Wildlife
     /// <summary>
     /// 小动物生态：在玩家周围动态生成 / 回收螃蟹、蝴蝶、鱼群、蝙蝠，以及跟随玩家的萤火虫粒子。
     /// 所有网格、贴图、材质都在运行时程序化生成，不依赖外部资源。挂在场景里一个物体上即可。
+    /// 数量、范围、受惊距离等参数在 WildlifeConfig（Assets/Config/Wildlife.asset）。
     /// </summary>
     public class WildlifeDirector : MonoBehaviour
     {
         public Transform player;
         public DayNightCycle dayNight;
         public Material fireflyMaterial;
-
-        [Header("数量")]
-        public int maxCrabs = 14;
-        public int maxButterflies = 12;
-        public int maxFishSchools = 4;
-        public int maxBats = 7;
-
-        [Header("范围")]
-        public float spawnRadius = 28f;
-        public float despawnRadius = 45f;
+        [Tooltip("小动物参数（Assets/Config/Wildlife.asset）；为空时用默认值")]
+        public WildlifeConfig config;
 
         Terrain terrain;
         readonly List<Critter> crabs = new List<Critter>();
@@ -57,6 +50,7 @@ namespace Rishi.Wildlife
 
         void Start()
         {
+            if (config == null) { config = ScriptableObject.CreateInstance<WildlifeConfig>(); config.hideFlags = HideFlags.HideAndDontSave; }
             terrain = Terrain.activeTerrain;
             if (player == null) player = GameSignals.Player;
             fireflies = CreateFireflies();
@@ -66,23 +60,23 @@ namespace Rishi.Wildlife
         {
             if (player == null || terrain == null) return;
             float sun = dayNight != null ? dayNight.SunElevation : 0.5f;
-            bool day = sun > 0.05f;
-            bool dusk = sun < 0.12f;
+            bool day = sun > config.dayElevation;
+            bool dusk = sun < config.duskElevation;
 
             // 萤火虫：夜晚、在植被里
             var em = fireflies.emission;
             string here = SurfaceTag.TerrainSurface(terrain, player.position);
-            em.rateOverTime = sun < -0.03f && (here == "grass" || here == "leaves") ? 14f : 0f;
+            em.rateOverTime = sun < config.fireflyElevation && (here == "grass" || here == "leaves") ? config.fireflyRate : 0f;
             fireflies.transform.position = player.position;
 
             tick -= Time.deltaTime;
             if (tick > 0) return;
             tick = 0.5f;
 
-            Maintain(crabs, maxCrabs, true, SpawnCrab);
-            Maintain(butterflies, day ? maxButterflies : 0, day, SpawnButterfly);
-            Maintain(fish, maxFishSchools, true, SpawnFish);
-            Maintain(bats, dusk ? maxBats : 0, dusk, SpawnBat);
+            Maintain(crabs, config.maxCrabs, true, SpawnCrab);
+            Maintain(butterflies, day ? config.maxButterflies : 0, day, SpawnButterfly);
+            Maintain(fish, config.maxFishSchools, true, SpawnFish);
+            Maintain(bats, dusk ? config.maxBats : 0, dusk, SpawnBat);
         }
 
         void Maintain(List<Critter> list, int max, bool allowed, System.Func<Critter> spawn)
@@ -90,7 +84,7 @@ namespace Rishi.Wildlife
             for (int i = list.Count - 1; i >= 0; i--)
             {
                 var c = list[i];
-                bool far = c == null || (c.transform.position - player.position).sqrMagnitude > despawnRadius * despawnRadius;
+                bool far = c == null || (c.transform.position - player.position).sqrMagnitude > config.despawnRadius * config.despawnRadius;
                 if (c == null || far || c.Done || !allowed && !c.Visible(player.position))
                 {
                     if (c != null) Destroy(c.gameObject);
@@ -125,30 +119,33 @@ namespace Rishi.Wildlife
 
         Critter SpawnCrab()
         {
-            if (!FindSpot(6f, spawnRadius, (p, h) => h > 0.15f && h < 2.6f && SurfaceTag.TerrainSurface(terrain, p).Contains("sand"), out var pos)) return null;
+            if (!FindSpot(6f, config.spawnRadius, (p, h) => h > 0.15f && h < 2.6f && SurfaceTag.TerrainSurface(terrain, p).Contains("sand"), out var pos)) return null;
             var go = Critters.Crab();
             go.transform.position = pos;
             var c = go.AddComponent<Crab>();
+            c.config = config;
             c.Init(terrain, player);
             return c;
         }
 
         Critter SpawnButterfly()
         {
-            if (!FindSpot(4f, spawnRadius * 0.7f, (p, h) => h > 2.5f && SurfaceTag.TerrainSurface(terrain, p) is string s && (s == "grass" || s == "leaves"), out var pos)) return null;
+            if (!FindSpot(4f, config.spawnRadius * 0.7f, (p, h) => h > 2.5f && SurfaceTag.TerrainSurface(terrain, p) is string s && (s == "grass" || s == "leaves"), out var pos)) return null;
             var go = Critters.Butterfly(Random.Range(0, 3));
             go.transform.position = pos + Vector3.up * 1.2f;
             var c = go.AddComponent<Butterfly>();
+            c.config = config;
             c.Init(terrain, player);
             return c;
         }
 
         Critter SpawnFish()
         {
-            if (!FindSpot(8f, spawnRadius + 8f, (p, h) => h < -0.7f && h > -5f, out var pos)) return null;
+            if (!FindSpot(8f, config.spawnRadius + 8f, (p, h) => h < -0.7f && h > -5f, out var pos)) return null;
             var go = new GameObject("FishSchool");
             go.transform.position = new Vector3(pos.x, 0, pos.z);
             var c = go.AddComponent<FishSchool>();
+            c.config = config;
             c.Init(terrain, player);
             return c;
         }
@@ -157,6 +154,7 @@ namespace Rishi.Wildlife
         {
             var go = Critters.Bat();
             var c = go.AddComponent<Bat>();
+            c.config = config;
             c.Init(terrain, player);
             return c;
         }
@@ -202,6 +200,8 @@ namespace Rishi.Wildlife
     /// <summary>小动物基类。</summary>
     public abstract class Critter : MonoBehaviour
     {
+        /// <summary>由 WildlifeDirector 在 Init 之前设置。</summary>
+        public WildlifeConfig config;
         protected Terrain terrain;
         protected Transform player;
         public bool Done { get; protected set; }

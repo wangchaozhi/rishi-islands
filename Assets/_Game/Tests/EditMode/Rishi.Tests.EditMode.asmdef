@@ -6,6 +6,7 @@
         "UnityEditor.TestRunner",
         "Rishi.Core",
         "Rishi.World",
+        "Rishi.Audio",
         "Rishi.Story"
     ],
     "includePlatforms": [

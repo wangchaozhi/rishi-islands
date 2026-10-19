@@ -52,8 +52,13 @@ python Tools/AssetFetch/fetch_all.py
 最后生成场景（也可以在编辑器里用菜单 `Tools/Island`）：
 
 ```bash
+# Windows
 Unity.exe -batchmode -quit -projectPath . -executeMethod Rishi.Builders.IslandPreview.BuildAndCapture -logFile build.log
+# macOS（编辑器路径按 Unity Hub 的安装位置调整）
+/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity -batchmode -quit -projectPath . -executeMethod Rishi.Builders.IslandPreview.BuildAndCapture -logFile build.log
 ```
+
+只改了某一部分时，可以用菜单 `Tools/Island/分步重建` 单独重跑（剧情 / 地貌与植被 / 声音 / 画质）。昼夜、风、天气、音效、小动物的参数在 `Assets/Config/` 里，直接在 Inspector 里调，见 [架构说明](Docs/架构说明.md)。
 
 打开 `Assets/Scenes/Island.unity` 按 Play。操作：WASD 移动、Shift 冲刺、空格跳、鼠标左键射击、R 换弹、E 互动、J 日志、按住 T 快进时间、Esc 释放鼠标。
 

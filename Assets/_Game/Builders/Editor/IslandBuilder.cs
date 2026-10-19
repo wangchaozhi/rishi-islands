@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Rishi.Core;
@@ -22,7 +23,8 @@ namespace Rishi.Builders
 {
     /// <summary>
     /// 生成荒岛场景：程序化地形（沙滩/草地/丛林/岩壁）、海洋、植被、日夜交替、玩家。
-    /// 菜单 Tools/Island/重建荒岛场景，或命令行 -executeMethod Rishi.Builders.IslandBuilder.Build。
+    /// 菜单 Tools/Island/重建荒岛场景，或命令行 -executeMethod Rishi.Builders.IslandBuilder.Build；
+    /// 也可以在 Tools/Island/分步重建 里单独重跑某一步（命令行用 IslandBuilder.RebuildStory / RebuildNature / RebuildAudio / RebuildVisual）。
     /// 海平面在 y = 0；地形高度范围 -20 ~ 60 米。
     /// </summary>
     public static class IslandBuilder
@@ -38,24 +40,111 @@ namespace Rishi.Builders
         const int DetailRes = 1024;
         const int Seed = 1337;
 
+        // 场景按生成步骤分组：每一步新建的物体都收进同名根节点，单独重跑某一步时先删掉它的根节点再重建。
+        // 地形是其余步骤的基础，改地形就整座岛重建；剧情重建会换掉玩家，所以连带重跑声音和画质；
+        // 植被重建会重新生成植物材质，所以连带重跑画质（植物风动画着色器）。
+        const string TerrainRoot = "[地形]", StoryRoot = "[剧情]", NatureRoot = "[地貌与植被]", AudioRoot = "[声音]", VisualRoot = "[画质]";
+
+        static readonly (string root, System.Action build)[] Steps =
+        {
+            (TerrainRoot, BuildTerrainStep),
+            (StoryRoot, BuildStoryStep),
+            (NatureRoot, BuildNatureStep),
+            (AudioRoot, BuildAudioStep),
+            (VisualRoot, BuildVisualStep),
+        };
+
         [MenuItem("Tools/Island/重建荒岛场景")]
         public static void Build()
         {
+            Prepare(cleanPlants: true);
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            foreach (var (root, build) in Steps) RunStep(root, build);
+            Save(scene);
+        }
+
+        [MenuItem("Tools/Island/分步重建/地形（整座岛重建）")]
+        public static void RebuildTerrain() => Build();
+
+        [MenuItem("Tools/Island/分步重建/剧情（连带声音、画质）")]
+        public static void RebuildStory() => Rerun(StoryRoot, AudioRoot, VisualRoot);
+
+        [MenuItem("Tools/Island/分步重建/地貌与植被（连带画质）")]
+        public static void RebuildNature() => Rerun(NatureRoot, VisualRoot);
+
+        [MenuItem("Tools/Island/分步重建/声音")]
+        public static void RebuildAudio() => Rerun(AudioRoot);
+
+        [MenuItem("Tools/Island/分步重建/画质")]
+        public static void RebuildVisual() => Rerun(VisualRoot);
+
+        static void Rerun(params string[] roots)
+        {
+            var scene = SceneManager.GetActiveScene();
+            if (scene.path != ScenePath)
+            {
+                if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+                scene = EditorSceneManager.OpenScene(ScenePath);
+            }
+            var missing = Steps.Select(s => s.root).Where(r => scene.GetRootGameObjects().All(g => g.name != r)).ToList();
+            if (missing.Count > 0)
+            {
+                Debug.LogError($"[Island] 场景里没有 {string.Join("、", missing)}，是分步之前的旧场景，请先用「重建荒岛场景」整体重建一次");
+                return;
+            }
+            Prepare(cleanPlants: roots.Contains(NatureRoot));
+            foreach (var (root, build) in Steps)
+                if (roots.Contains(root)) RunStep(root, build);
+            Save(scene);
+        }
+
+        /// <summary>删掉这一步上次生成的根节点，重新生成，并把新出现的根物体收进根节点。每一步用固定的随机种子，单独重跑和整体重建结果一致。</summary>
+        static void RunStep(string rootName, System.Action build)
+        {
+            var scene = SceneManager.GetActiveScene();
+            foreach (var old in scene.GetRootGameObjects().Where(g => g.name == rootName)) Object.DestroyImmediate(old);
+            Random.InitState(Seed + System.Array.FindIndex(Steps, s => s.root == rootName) * 1000);
+            var before = new HashSet<GameObject>(scene.GetRootGameObjects());
+            build();
+            var root = new GameObject(rootName);
+            foreach (var go in scene.GetRootGameObjects())
+                if (go != root && !before.Contains(go)) go.transform.SetParent(root.transform, true);
+            Debug.Log($"[Island] 步骤 {rootName} 完成，{root.transform.childCount} 个物体");
+        }
+
+        static void Prepare(bool cleanPlants)
+        {
             foreach (var dir in new[] { Gen, Gen + "/Materials", Gen + "/Meshes", Gen + "/Prefabs", Gen + "/Terrain" })
                 Directory.CreateDirectory(dir);
-            Random.InitState(Seed);
-
+            FPSSceneBuilder.EnsureSharedAssets();
             FPSSceneBuilder.EnsureWeaponLayer();
             FPSSceneBuilder.ConfigureImports();
             if (BirdsSetup.Available) { BirdsSetup.EnsureTags(); BirdsSetup.ConvertMaterials(); }
-            JunglePlants.Clean();
+            if (cleanPlants) JunglePlants.Clean(); // 程序化植物的网格和预制体全部重新生成（只有植被步骤引用它们）
             JunglePlants.ConfigureTextures();
             FPSSceneBuilder.ConfigurePipeline();
             ConfigurePipelineForIsland();
+        }
 
-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        static void Save(Scene scene)
+        {
+            var cycle = Object.FindFirstObjectByType<DayNightCycle>();
+            if (cycle != null) { cycle.Apply(false); DynamicGI.UpdateEnvironment(); }
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            var scenes = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();
+            scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
+            AssetDatabase.SaveAssets();
+            var player = GameObject.Find("Player");
+            Debug.Log($"[Island] 荒岛场景已保存：{ScenePath}" + (player != null ? $"，出生点 {player.transform.position}" : ""));
+        }
 
-            // ---------- 光照与天空 ----------
+        static Terrain IslandTerrain => Object.FindFirstObjectByType<Terrain>();
+        static DayNightCycle Cycle => Object.FindFirstObjectByType<DayNightCycle>();
+
+        // ---------- 步骤 1：地形（光照与天空、昼夜、地形、海洋） ----------
+        static void BuildTerrainStep()
+        {
             var sun = new GameObject("Sun").AddComponent<Light>();
             sun.type = LightType.Directional;
             sun.shadows = LightShadows.Soft;
@@ -95,72 +184,46 @@ namespace Rishi.Builders
             probe.transform.position = new Vector3(0, 30, 0);
 
             var cycle = new GameObject("DayNightCycle").AddComponent<DayNightCycle>();
+            cycle.config = ConfigAssets.DayNight; // 默认早上 7 点：风暴过后，日出后不久在沙滩上醒来（太阳高度 15°，低角度暖光）
             cycle.sun = sun;
             cycle.moon = moon;
             cycle.skyProbe = probe;
-            cycle.dayAmbient = 1.5f;
-            cycle.timeOfDay = 7.0f; // 风暴过后，日出后不久在沙滩上醒来（太阳高度 15°，低角度暖光）
+            cycle.timeOfDay = cycle.config.startTime;
 
-            // ---------- 地形 ----------
-            var terrain = CreateTerrain(out var heightTex);
-
-            // ---------- 海洋 ----------
+            CreateTerrain(out var heightTex);
             CreateOcean(heightTex);
+        }
 
-            // ---------- 第一章：沉船与神殿（先建，植被会避开它们） ----------
+        // ---------- 步骤 2：剧情（沉船、营地、神殿、拾取物、玩家、剧情系统、开场 CG） ----------
+        static void BuildStoryStep()
+        {
+            var terrain = IslandTerrain;
+            var cycle = Cycle;
+
+            // 先建剧情场景，植被步骤会避开它们
             IslandStoryBuilder.ClearZones.Clear();
             var spawnPoint = FindBeachSpawn(terrain);
-            IslandStoryBuilder.ClearZones.Add((new Vector2(spawnPoint.x, spawnPoint.z), 6f));
+            IslandStoryBuilder.ClearZones.Add((new Vector2(spawnPoint.x, spawnPoint.z), IslandStoryBuilder.SpawnClearRadius));
             IslandStoryBuilder.BuildWreck(terrain, spawnPoint);
             IslandStoryBuilder.BuildCamp(terrain, spawnPoint);
             IslandStoryBuilder.BuildRuin(terrain);
 
-            // ---------- 多地貌：溪流、海崖与岩石、红树林 ----------
-            IslandFeatures.BuildRiver(terrain);
-            IslandFeatures.BuildCliffsAndRocks(terrain);
-            IslandFeatures.BuildMangroves(terrain, TreePrefab("island_tree_02"));
-
-            // ---------- 植被与岩石 ----------
-            PlaceTrees(terrain);
-            PlacePalms(terrain);
-            PlaceCanopy(terrain);
-            PlaceRocks(terrain);
-            PaintDetails(terrain);
-
-            // ---------- 海底世界 ----------
-            MarineBuilder.Build(terrain, spawnPoint);
+            // 武器与道具拾取物（放在沉船、营地旁）
             GameplaySetup.PlacePickups(terrain, spawnPoint);
 
-            // ---------- 后处理 ----------
-            FPSSceneBuilder.CreateVolume("IslandPostProcess", temperature: -1f, saturation: -4f, contrast: 5f);
-
-            // ---------- 玩家 ----------
+            // 玩家：出生时面朝沉船
             var pistolMat = FPSSceneBuilder.Pbr("Pistol", "Models/service_pistol", 1f);
             FPSSceneBuilder.BuildPlayer(pistolMat);
             var player = GameObject.Find("Player");
-            var spawn = spawnPoint;
-            // 出生时面朝沉船
             var wreck = GameObject.Find("Shipwreck").transform.position;
-            float spawnYaw = Mathf.Atan2(wreck.x - spawn.x, wreck.z - spawn.z) * Mathf.Rad2Deg;
-            player.transform.SetPositionAndRotation(spawn + Vector3.up * 1.05f, Quaternion.Euler(0, spawnYaw, 0));
+            float spawnYaw = Mathf.Atan2(wreck.x - spawnPoint.x, wreck.z - spawnPoint.z) * Mathf.Rad2Deg;
+            player.transform.SetPositionAndRotation(spawnPoint + Vector3.up * 1.05f, Quaternion.Euler(0, spawnYaw, 0));
             var cam = player.GetComponentInChildren<Camera>();
             cam.farClipPlane = 3000f;
-            var hud = player.GetComponent<HUD>();
-            hud.dayNight = cycle;
+            player.GetComponent<HUD>().dayNight = cycle;
             cam.GetComponent<UnderwaterFX>().dayNight = cycle;
 
-            // ---------- 声音 ----------
-            AudioSetup.CreateManager();
-            AudioSetup.SetupPlayer(player, cycle);
-
-            // ---------- 小动物 ----------
-            var wildlife = new GameObject("Wildlife").AddComponent<WildlifeDirector>();
-            wildlife.player = player.transform;
-            wildlife.dayNight = cycle;
-            wildlife.fireflyMaterial = FireflyMaterial();
-            if (BirdsSetup.Available) BirdsSetup.Build(terrain, cycle); // Living Birds（Asset Store）
-
-            // ---------- 剧情系统 ----------
+            // 剧情系统
             var story = new GameObject("Story");
             story.AddComponent<GameState>();
             var monologue = story.AddComponent<OpeningMonologue>();
@@ -169,33 +232,81 @@ namespace Rishi.Builders
             interactor.mask = ~(1 << 8);
             player.AddComponent<StoryUI>().interactor = interactor;
 
-            // ---------- 开场 CG ----------
+            // 开场 CG：CG01 风暴 → CG02 醒来
             var wakeUp = CutsceneBuilder.BuildWakeUp(player, wreck, monologue, playOnStart: false);
-            CutsceneBuilder.BuildStorm(cycle, GameObject.Find("Ocean").GetComponent<Renderer>(), wakeUp); // CG01 风暴 → CG02 醒来
+            CutsceneBuilder.BuildStorm(cycle, GameObject.Find("Ocean").GetComponent<Renderer>(), wakeUp);
 
             var fx = new GameObject("FX").AddComponent<FXManager>();
             fx.additiveMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Generated/Materials/FX_Soft.mat");
             fx.dustMaterial = fx.additiveMaterial;
             fx.bulletHoleMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Generated/Materials/FX_BulletHole.mat");
+        }
 
-            // ---------- 电影画质：风、体积光、TAA、过场电影后处理 ----------
-            new GameObject("Wind").AddComponent<WindController>();
+        // ---------- 步骤 3：地貌与植被（溪流、海崖、红树林、树、石头、地表植物、海底世界、小动物、鸟群） ----------
+        static void BuildNatureStep()
+        {
+            var terrain = IslandTerrain;
+            CollectClearZones(terrain);
+
+            IslandFeatures.BuildRiver(terrain);
+            IslandFeatures.BuildCliffsAndRocks(terrain);
+            IslandFeatures.BuildMangroves(terrain, TreePrefab("island_tree_02"));
+
+            PlaceTrees(terrain);
+            PlacePalms(terrain);
+            PlaceCanopy(terrain);
+            PlaceRocks(terrain);
+            PaintDetails(terrain);
+
+            // 海底世界：沙波、礁盘、珊瑚、海草、沉船残骸
+            MarineBuilder.Build(terrain, FindBeachSpawn(terrain));
+
+            var wildlife = new GameObject("Wildlife").AddComponent<WildlifeDirector>(); // 运行时通过 GameSignals 找玩家
+            wildlife.config = ConfigAssets.Wildlife;
+            wildlife.dayNight = Cycle;
+            wildlife.fireflyMaterial = FireflyMaterial();
+            if (BirdsSetup.Available) BirdsSetup.Build(terrain, Cycle); // Living Birds（Asset Store）
+        }
+
+        /// <summary>植物、石头要避开的空地：出生点、沉船、营地、神殿。从场景里的剧情物体读位置，单独重跑植被时也能用。</summary>
+        static void CollectClearZones(Terrain terrain)
+        {
+            var zones = IslandStoryBuilder.ClearZones;
+            zones.Clear();
+            var spawn = FindBeachSpawn(terrain);
+            zones.Add((new Vector2(spawn.x, spawn.z), IslandStoryBuilder.SpawnClearRadius));
+            void Add(string name, float radius)
+            {
+                var go = GameObject.Find(name);
+                if (go != null) zones.Add((new Vector2(go.transform.position.x, go.transform.position.z), radius));
+                else Debug.LogWarning($"[Island] 场景里没有 {name}，植被不会避开它");
+            }
+            Add("Shipwreck", IslandStoryBuilder.WreckClearRadius);
+            Add("FatherCamp", IslandStoryBuilder.CampClearRadius);
+            zones.Add((IslandStoryBuilder.RuinCenter, IslandStoryBuilder.RuinClearRadius));
+        }
+
+        // ---------- 步骤 4：声音（音效表、音效管理器、玩家脚步声与环境声） ----------
+        static void BuildAudioStep()
+        {
+            var player = GameObject.Find("Player");
+            foreach (var c in player.GetComponents<Footsteps>()) Object.DestroyImmediate(c);
+            foreach (var c in player.GetComponents<AmbientController>()) Object.DestroyImmediate(c);
+            AudioSetup.CreateManager();
+            AudioSetup.SetupPlayer(player, Cycle);
+        }
+
+        // ---------- 步骤 5：画质（后处理、风、体积光、植物风动画、TAA、过场电影后处理） ----------
+        static void BuildVisualStep()
+        {
+            FPSSceneBuilder.CreateVolume("IslandPostProcess", temperature: -1f, saturation: -4f, contrast: 5f);
+            new GameObject("Wind").AddComponent<WindController>().config = ConfigAssets.Wind;
             CinematicSetup.EnsureVolumetricLight();
             CinematicSetup.ApplyFoliageWind();
             CinematicSetup.TuneGameplayProfile("Assets/Art/Generated/IslandPostProcess.asset");
-            CinematicSetup.UseTAA(cam);
+            CinematicSetup.UseTAA(GameObject.Find("Player").GetComponentInChildren<Camera>());
             var cinematic = CinematicSetup.CreateCinematicVolume();
-            foreach (var cp in Object.FindObjectsByType<CutscenePlayer>(FindObjectsSortMode.None)) cp.cinematicVolume = cinematic;
-
-            cycle.Apply(false);
-            DynamicGI.UpdateEnvironment();
-
-            EditorSceneManager.SaveScene(scene, ScenePath);
-            var scenes = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();
-            scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
-            EditorBuildSettings.scenes = scenes.ToArray();
-            AssetDatabase.SaveAssets();
-            Debug.Log($"[Island] 荒岛场景已生成：{ScenePath}，出生点 {spawn}");
+            foreach (var cp in Object.FindObjectsByType<CutscenePlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None)) cp.cinematicVolume = cinematic;
         }
 
         // ================= 地形 =================

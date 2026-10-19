@@ -37,6 +37,7 @@ namespace Rishi.Builders
         static readonly string[] GlyphLabels = { "海浪", "太阳", "群山", "月亮" };
 
         public static readonly List<(Vector2 center, float radius)> ClearZones = new List<(Vector2, float)>();
+        public const float SpawnClearRadius = 6f, WreckClearRadius = 22f, CampClearRadius = 10f, RuinClearRadius = 22f;
 
         // ================= 沉船 =================
 
@@ -50,7 +51,7 @@ namespace Rishi.Builders
             float yaw = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg + 90f; // 船身大致平行海岸线
             root.position = shore + new Vector3(dir.x, 0, dir.y) * 5f;
             root.rotation = Quaternion.Euler(0, yaw, 0);
-            ClearZones.Add((new Vector2(root.position.x, root.position.z), 22f));
+            ClearZones.Add((new Vector2(root.position.x, root.position.z), WreckClearRadius));
 
             // 船体：去掉帆和索具，侧倾、半埋进沙里
             var shipPrefab = FPSSceneBuilder.LoadModel("Models/ship_pinnace");
@@ -177,7 +178,7 @@ namespace Rishi.Builders
                 if (p.y > 4.5f && slope < 14f) { pos = p; break; }
             }
             pos = Ground(terrain, pos);
-            ClearZones.Add((new Vector2(pos.x, pos.z), 10f));
+            ClearZones.Add((new Vector2(pos.x, pos.z), CampClearRadius));
 
             var root = new GameObject("FatherCamp").transform;
             AudioSetup.Tag(root.gameObject, "wood");
@@ -274,7 +275,7 @@ namespace Rishi.Builders
 
         public static void BuildRuin(Terrain terrain)
         {
-            ClearZones.Add((RuinCenter, 22f));
+            ClearZones.Add((RuinCenter, RuinClearRadius));
             var c = new Vector3(RuinCenter.x, 0, RuinCenter.y);
             c.y = terrain.SampleHeight(c) + terrain.transform.position.y;
             var root = new GameObject("SunTemple").transform;

@@ -162,7 +162,7 @@ namespace Rishi.Wildlife
 
             Vector3 away = transform.position - player.position;
             away.y = 0;
-            if (!fleeing && away.magnitude < 4.5f)
+            if (!fleeing && away.magnitude < config.crabFleeDistance)
             {
                 fleeing = true;
                 wait = 0;
@@ -181,7 +181,7 @@ namespace Rishi.Wildlife
 
             Vector3 move = target - transform.position;
             move.y = 0;
-            float speed = fleeing ? 3.4f : 0.9f;
+            float speed = fleeing ? config.crabFleeSpeed : config.crabWalkSpeed;
             if (move.magnitude < 0.1f)
             {
                 if (fleeing) burrow = 0f;
@@ -233,7 +233,7 @@ namespace Rishi.Wildlife
         {
             float t = Time.time * 0.35f + seed;
             Vector3 away = transform.position - player.position;
-            if (away.magnitude < 2.2f) anchor += (away.normalized + Vector3.up * 0.3f) * 3f * Time.deltaTime;
+            if (away.magnitude < config.butterflyFleeDistance) anchor += (away.normalized + Vector3.up * 0.3f) * 3f * Time.deltaTime;
 
             var offs = new Vector3((Mathf.PerlinNoise(t, seed) - 0.5f) * 7f, 0, (Mathf.PerlinNoise(seed, t) - 0.5f) * 7f);
             var p = anchor + offs;
@@ -289,11 +289,11 @@ namespace Rishi.Wildlife
             desired.y = 0;
             Vector3 away = transform.position - player.position;
             away.y = 0;
-            bool scared = away.magnitude < 4.5f;
+            bool scared = away.magnitude < config.fishScareDistance;
             if (scared) desired = away.normalized * 4f;
             else if (desired.magnitude < 1f) PickTarget();
 
-            float speed = scared ? 3.5f : 1.1f;
+            float speed = scared ? config.fishFleeSpeed : config.fishSwimSpeed;
             velocity = Vector3.Lerp(velocity, desired.normalized * speed, 2f * Time.deltaTime);
             Vector3 next = transform.position + velocity * Time.deltaTime;
             float depth = -Ground(next);

@@ -1,0 +1,332 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 740a15fac76174007ad314bc9a99ce2b, type: 3}
+  m_Name: SoundLibrary
+  m_EditorClassIdentifier: Rishi.Audio::Rishi.Audio.SoundLibrary
+  sounds:
+  - id: amb_jungle_day
+    clips:
+    - {fileID: 8300000, guid: f57e67f8fe4527b4f81291d5a0d11372, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_night
+    clips:
+    - {fileID: 8300000, guid: f3faa4bc6383bf24cb248fe5b4911bc4, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_ocean
+    clips:
+    - {fileID: 8300000, guid: c2fd66642f8c91548a72fe9dca68276d, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_river
+    clips:
+    - {fileID: 8300000, guid: 2cbf08a6bf58d3c46a9db9179563d669, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_storm
+    clips:
+    - {fileID: 8300000, guid: bcfecbf0d6e2c8d4da1440ef08da141c, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_swamp
+    clips:
+    - {fileID: 8300000, guid: f137b7ba36c61d14d97f3692a6fcacdf, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_temple
+    clips:
+    - {fileID: 8300000, guid: 779369d1a7bf95e439692e14edf47577, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: amb_wind
+    clips:
+    - {fileID: 8300000, guid: 14f31cc14a991b243b882f3180d61155, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
+  - id: bat_squeak
+    clips:
+    - {fileID: 8300000, guid: 25fc72f6dd2ced044a7b28842520d0ed, type: 3}
+    - {fileID: 8300000, guid: 92343fd19bda08a4ca89d891f37af3c6, type: 3}
+    - {fileID: 8300000, guid: bc184759fdb8ab4419b36e824ad653a8, type: 3}
+    category: 1
+    volume: 0.45
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: chest_open
+    clips:
+    - {fileID: 8300000, guid: de5d49012113b7347ab083d510e9a8cd, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
+  - id: crab_click
+    clips:
+    - {fileID: 8300000, guid: 103191ad0bd8c9e49b8839b638e9ee4d, type: 3}
+    - {fileID: 8300000, guid: dff108bb8cd973142a6277b8625a2708, type: 3}
+    - {fileID: 8300000, guid: d2957abd674b0ac44a10c840f0cc0eee, type: 3}
+    category: 1
+    volume: 0.45
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 12
+  - id: fish_splash
+    clips:
+    - {fileID: 8300000, guid: 5788c4a5cea88af4ea313b85e51b90ad, type: 3}
+    - {fileID: 8300000, guid: 12e83430e72702344b1a2e1b029c88c4, type: 3}
+    - {fileID: 8300000, guid: f4889581dd354804b83d27638880c300, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 30
+  - id: fragment_get
+    clips:
+    - {fileID: 8300000, guid: 63985c13868ab714f9db6bee9e1e1a51, type: 3}
+    category: 2
+    volume: 0.8
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 30
+  - id: gun_empty
+    clips:
+    - {fileID: 8300000, guid: 1d5ab1e7949144845894ec29832bfdbc, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 15
+  - id: gun_reload
+    clips:
+    - {fileID: 8300000, guid: 48aad36e87c0f204a823acb93715a9b3, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 15
+  - id: gun_shot
+    clips:
+    - {fileID: 8300000, guid: 555dbc1845338fe4cbf45da8177d12b0, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 120
+  - id: hull_crash
+    clips:
+    - {fileID: 8300000, guid: 50e245b6aa6d956468cb57b10012fa2e, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 45
+  - id: impact_dirt
+    clips:
+    - {fileID: 8300000, guid: da763e970408fa3408c6797683ed58ed, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 35
+  - id: impact_metal
+    clips:
+    - {fileID: 8300000, guid: 0b70ab1b7b92cd24b9bb0769ccdd7b99, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 35
+  - id: impact_stone
+    clips:
+    - {fileID: 8300000, guid: 015e785b858e3534f8f902242428654a, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 35
+  - id: impact_wood
+    clips:
+    - {fileID: 8300000, guid: 78943ab369f1a8841a7cafc56088b016, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 35
+  - id: note_paper
+    clips:
+    - {fileID: 8300000, guid: a4548d1615bdf8548b5e6f9c04e60cb4, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 10
+  - id: note_recorder
+    clips:
+    - {fileID: 8300000, guid: dc3c8e97b1e65d54795921a97f800ac9, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 10
+  - id: puzzle_solved
+    clips:
+    - {fileID: 8300000, guid: 9e19c40d5cedd3045ae14d34ceccd6dc, type: 3}
+    category: 2
+    volume: 0.8
+    pitch: {x: 1, y: 1}
+    minDistance: 5
+    maxDistance: 80
+  - id: radio_static
+    clips:
+    - {fileID: 8300000, guid: e40593843ddd34c4ba156826be6a923e, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 45
+  - id: step_grass
+    clips:
+    - {fileID: 8300000, guid: 1967cb143e85d3741bb53a5455e9f166, type: 3}
+    - {fileID: 8300000, guid: 4d0472617fed2fb4c9c5004cb93114c4, type: 3}
+    - {fileID: 8300000, guid: 9e00f19b50b138d4aa9c68badd41e94f, type: 3}
+    - {fileID: 8300000, guid: 1d8b7137062bfe34aa0c62798d59fb35, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: step_leaves
+    clips:
+    - {fileID: 8300000, guid: df1c21e01a714a540a3ffd229ae807d1, type: 3}
+    - {fileID: 8300000, guid: a410047458e20394abca718c90dbe9bb, type: 3}
+    - {fileID: 8300000, guid: 8e8a6692c5a2fe34b807b7fb9acbd6dc, type: 3}
+    - {fileID: 8300000, guid: 6bc36a02ca80f49478bbf38c07c625e5, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: step_sand
+    clips:
+    - {fileID: 8300000, guid: eb54f907d50f2014a90841353c42e43d, type: 3}
+    - {fileID: 8300000, guid: c595a46d275081646974a8d066704289, type: 3}
+    - {fileID: 8300000, guid: f5c33ee751a97a841b4207cb7abb4ce8, type: 3}
+    - {fileID: 8300000, guid: ca56a431ea1003a4ab0069248957be4d, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: step_stone
+    clips:
+    - {fileID: 8300000, guid: 2dd7224d4e1a6654ea0f5b1454c93b2d, type: 3}
+    - {fileID: 8300000, guid: af75fc999b245694a8367d21be85d14c, type: 3}
+    - {fileID: 8300000, guid: d3f6809f151d3774aa8688474b47676d, type: 3}
+    - {fileID: 8300000, guid: 9290982e37895b94faa5d44169cbfa80, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: step_water
+    clips:
+    - {fileID: 8300000, guid: 99c42d3c74101084d848f46f6513899d, type: 3}
+    - {fileID: 8300000, guid: 6cca96b68b46f78499a4326976b1f0c8, type: 3}
+    - {fileID: 8300000, guid: f31c91cb54599584189a1ff99b503b63, type: 3}
+    - {fileID: 8300000, guid: 9ad064e9af40af543bef8c2f9ff6ced1, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: step_wetsand
+    clips:
+    - {fileID: 8300000, guid: 1bc4120f18655f8429552427577b0321, type: 3}
+    - {fileID: 8300000, guid: b2964b1d6b68eb146a0faf00dbab4cc3, type: 3}
+    - {fileID: 8300000, guid: b71b6bc8c870c7643882969fc0fb66fb, type: 3}
+    - {fileID: 8300000, guid: 8334ce7a8a0b74a4c828dc51ed97b1a0, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: step_wood
+    clips:
+    - {fileID: 8300000, guid: acf3403088a03d441a54107ae8e6f815, type: 3}
+    - {fileID: 8300000, guid: beb80f7c3663b47458995235eb8609b3, type: 3}
+    - {fileID: 8300000, guid: c7aa58091fd9176408743c0ac98263ff, type: 3}
+    - {fileID: 8300000, guid: 38827dbd29047cb45bb2e67cceb18631, type: 3}
+    category: 1
+    volume: 0.55
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 20
+  - id: stone_door
+    clips:
+    - {fileID: 8300000, guid: 1e0c38c295e1eef46b34aa4ad38fae40, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 6
+    maxDistance: 80
+  - id: stone_turn
+    clips:
+    - {fileID: 8300000, guid: b8f0f670dec2ead4aba38ddbe38cc3e6, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 30
+  - id: thunder
+    clips:
+    - {fileID: 8300000, guid: 2be23a2d09f5b454ea75d50b6f3b6bac, type: 3}
+    - {fileID: 8300000, guid: c830534a4792d774b9b969fc5e3fbab1, type: 3}
+    - {fileID: 8300000, guid: 0fa3fd4f41a9e56469c2f54bb46f4fae, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 45
+  - id: wave_crash
+    clips:
+    - {fileID: 8300000, guid: c52593b06f4c9eb46a21548464880013, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 45

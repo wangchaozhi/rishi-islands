@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Rishi.Core;
@@ -10,25 +9,15 @@ namespace Rishi.Audio
 
     /// <summary>
     /// 音效管理：按 id 播放（同一 id 可有多个变体随机挑选）、2D / 3D、对象池、分组音量。
+    /// 音效参数在 SoundLibrary（Assets/Config/SoundLibrary.asset）。
     /// 场景里放一个即可，其他脚本用 AudioManager.Play(...)，没有管理器时静默跳过。
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
-        [Serializable]
-        public class Sound
-        {
-            public string id;
-            public AudioClip[] clips;
-            public SoundCategory category = SoundCategory.Sfx;
-            [Range(0, 1.5f)] public float volume = 1f;
-            public Vector2 pitch = new Vector2(0.94f, 1.06f);
-            public float minDistance = 1.5f;
-            public float maxDistance = 45f;
-        }
-
         public static AudioManager Instance { get; private set; }
 
-        public List<Sound> sounds = new List<Sound>();
+        [Tooltip("音效表（Assets/Config/SoundLibrary.asset）")]
+        public SoundLibrary library;
         [Range(0, 1)] public float masterVolume = 1f;
         [Range(0, 1)] public float ambienceVolume = 0.8f;
         [Range(0, 1)] public float sfxVolume = 1f;
@@ -36,14 +25,15 @@ namespace Rishi.Audio
         [Range(0, 1)] public float voiceVolume = 1f;
         public int poolSize = 32;
 
-        readonly Dictionary<string, Sound> map = new Dictionary<string, Sound>();
+        readonly Dictionary<string, SoundLibrary.Sound> map = new Dictionary<string, SoundLibrary.Sound>();
         readonly List<AudioSource> pool = new List<AudioSource>();
 
         void Awake()
         {
             Instance = this;
-            foreach (var s in sounds)
-                if (!string.IsNullOrEmpty(s.id)) map[s.id] = s;
+            if (library != null)
+                foreach (var s in library.sounds)
+                    if (!string.IsNullOrEmpty(s.id)) map[s.id] = s;
             for (int i = 0; i < poolSize; i++)
             {
                 var go = new GameObject("Voice" + i);
@@ -64,7 +54,7 @@ namespace Rishi.Audio
             _ => sfxVolume,
         };
 
-        public Sound Get(string id) => map.TryGetValue(id, out var s) ? s : null;
+        public SoundLibrary.Sound Get(string id) => map.TryGetValue(id, out var s) ? s : null;
 
         public AudioClip RandomClip(string id)
         {

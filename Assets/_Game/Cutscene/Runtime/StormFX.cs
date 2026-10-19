@@ -20,10 +20,8 @@ namespace Rishi.Cutscene
         public Transform followCamera;
         public Material rainMaterial;
 
-        public float stormTime = 1.5f;     // 深夜
-        public float waveScale = 1.55f;
-        public float fogDensity = 0.0016f;
-        public Vector2 randomFlashInterval = new Vector2(3.5f, 8f);
+        [Tooltip("风暴的天气参数（Assets/Config/Weather_Storm.asset）；为空时用默认的风暴")]
+        public WeatherProfile weather;
 
         [System.Serializable]
         public struct Cue
@@ -42,6 +40,17 @@ namespace Rishi.Cutscene
         bool applied; // 只有真正改过设置才恢复，避免把未保存的默认值（0 点、时间停止）写回去
         float elapsed, nextFlash, flash;
         int nextCue;
+        static WeatherProfile defaultStorm;
+
+        WeatherProfile Weather
+        {
+            get
+            {
+                if (weather != null) return weather;
+                if (defaultStorm == null) { defaultStorm = WeatherProfile.CreateStorm(); defaultStorm.hideFlags = HideFlags.HideAndDontSave; }
+                return defaultStorm;
+            }
+        }
         AudioSource loop;
         ParticleSystem rain;
         MaterialPropertyBlock oceanBlock;
@@ -50,26 +59,27 @@ namespace Rishi.Cutscene
         {
             if (dayNight == null) return; // 构建场景时刚添加组件、还没接好引用
             applied = true;
+            var w = Weather;
             elapsed = 0;
             nextCue = 0;
-            nextFlash = Random.Range(randomFlashInterval.x, randomFlashInterval.y);
+            nextFlash = Random.Range(w.flashInterval.x, w.flashInterval.y);
             if (dayNight != null)
             {
                 savedTime = dayNight.timeOfDay;
                 savedRunning = dayNight.running;
                 dayNight.running = false;
-                dayNight.timeOfDay = stormTime;
+                if (w.forceTimeOfDay >= 0f) dayNight.timeOfDay = w.forceTimeOfDay;
                 dayNight.Apply(false);
             }
-            if (dayNight != null) dayNight.fogOverride = fogDensity;
+            if (dayNight != null) dayNight.fogOverride = w.fogDensity;
             savedFog = RenderSettings.fogDensity;
-            RenderSettings.fogDensity = fogDensity;
-            RenderSettings.fogColor = new Color(0.03f, 0.04f, 0.05f);
+            RenderSettings.fogDensity = w.fogDensity;
+            RenderSettings.fogColor = w.fogColor;
             if (ocean != null)
             {
                 oceanBlock ??= new MaterialPropertyBlock();
                 ocean.GetPropertyBlock(oceanBlock);
-                oceanBlock.SetFloat(WaveScaleId, waveScale);
+                oceanBlock.SetFloat(WaveScaleId, w.waveScale);
                 ocean.SetPropertyBlock(oceanBlock);
             }
             if (Application.isPlaying)
@@ -81,7 +91,7 @@ namespace Rishi.Cutscene
                 loop.volume = 0.9f;
                 if (loop.clip != null) loop.Play();
                 if (AmbientController.Instance != null) AmbientController.Instance.silence = 1f; // 风暴盖过平时的环境声
-                if (WindController.Instance != null) WindController.Instance.boost = 2.5f;
+                if (WindController.Instance != null) WindController.Instance.boost = w.windBoost;
                 rain = CreateRain();
             }
         }
@@ -120,9 +130,9 @@ namespace Rishi.Cutscene
             }
 
             nextFlash -= Time.deltaTime;
-            if (nextFlash <= 0)
+            if (Weather.lightning && nextFlash <= 0)
             {
-                nextFlash = Random.Range(randomFlashInterval.x, randomFlashInterval.y);
+                nextFlash = Random.Range(Weather.flashInterval.x, Weather.flashInterval.y);
                 Flash(false);
             }
 

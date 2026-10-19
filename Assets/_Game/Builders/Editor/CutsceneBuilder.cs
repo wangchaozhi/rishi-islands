@@ -199,6 +199,7 @@ namespace Rishi.Builders
             var stormGo = new GameObject("CG01_Storm");
             var storm = stormGo.AddComponent<StormFX>();
             storm.dayNight = dayNight;
+            storm.weather = ConfigAssets.Storm;
             storm.ocean = ocean;
             storm.rainMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Generated/Materials/FX_Soft.mat");
             var lightningLight = new GameObject("Lightning").AddComponent<Light>();

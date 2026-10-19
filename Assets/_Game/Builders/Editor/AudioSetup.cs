@@ -19,14 +19,15 @@ using Rishi.Rendering;
 namespace Rishi.Builders
 {
     /// <summary>
-    /// 编辑器工具：扫描音效文件夹，生成场景里的 AudioManager（同名带 _1/_2… 后缀的文件归为同一个音效的多个变体）。
+    /// 编辑器工具：扫描音效文件夹，更新音效表 Assets/Config/SoundLibrary.asset（同名带 _1/_2… 后缀的文件归为同一个音效的多个变体），
+    /// 并生成场景里的 AudioManager。
     /// 正式音效到位后，把文件放进 Assets/Audio/Final 并用相同的文件名，就会优先使用正式音效。
     /// </summary>
     public static class AudioSetup
     {
         static readonly string[] Folders = { "Assets/Audio/Final", "Assets/Audio/Placeholder" };
 
-        // id 前缀 -> (分类, 音量, 最小距离, 最大距离)
+        // 新音效的默认参数：id 前缀 -> (分类, 音量, 最小距离, 最大距离)
         static readonly (string prefix, SoundCategory cat, float vol, float min, float max)[] Rules =
         {
             ("amb_", SoundCategory.Ambience, 1f, 1f, 50f),
@@ -105,23 +106,32 @@ namespace Rishi.Builders
                 clips[kv.Key] = list;
             }
 
-            var go = new GameObject("AudioManager");
-            var am = go.AddComponent<AudioManager>();
+            // 更新音效表：已有条目只换音频文件，保留 Inspector 里调过的参数；新 id 按前缀规则给默认值
+            var library = ConfigAssets.Sounds;
+            library.sounds.RemoveAll(s => !clips.ContainsKey(s.id));
             foreach (var kv in clips.OrderBy(k => k.Key))
             {
+                var entry = library.Find(kv.Key);
+                if (entry != null) { entry.clips = kv.Value.ToArray(); continue; }
+                entry = new SoundLibrary.Sound { id = kv.Key, clips = kv.Value.ToArray() };
                 var rule = Rules.FirstOrDefault(r => kv.Key.StartsWith(r.prefix));
-                var s = new AudioManager.Sound { id = kv.Key, clips = kv.Value.ToArray() };
                 if (rule.prefix != null)
                 {
-                    s.category = rule.cat;
-                    s.volume = rule.vol;
-                    s.minDistance = rule.min;
-                    s.maxDistance = rule.max;
+                    entry.category = rule.cat;
+                    entry.volume = rule.vol;
+                    entry.minDistance = rule.min;
+                    entry.maxDistance = rule.max;
                 }
-                if (kv.Key.StartsWith("amb_") || kv.Key.StartsWith("puzzle_") || kv.Key.StartsWith("fragment_") || kv.Key == "heartbeat" || kv.Key == "knock_three") s.pitch = Vector2.one;
-                am.sounds.Add(s);
+                if (kv.Key.StartsWith("amb_") || kv.Key.StartsWith("puzzle_") || kv.Key.StartsWith("fragment_") || kv.Key == "heartbeat" || kv.Key == "knock_three") entry.pitch = Vector2.one;
+                library.sounds.Add(entry);
             }
-            Debug.Log($"[Audio] {am.sounds.Count} sounds: {string.Join(", ", am.sounds.Select(s => s.id + (s.clips.Length > 1 ? $"×{s.clips.Length}" : "")))}");
+            library.sounds.Sort((a, b) => string.CompareOrdinal(a.id, b.id));
+            EditorUtility.SetDirty(library);
+
+            var go = new GameObject("AudioManager");
+            var am = go.AddComponent<AudioManager>();
+            am.library = library;
+            Debug.Log($"[Audio] {library.sounds.Count} sounds: {string.Join(", ", library.sounds.Select(s => s.id + (s.clips.Length > 1 ? $"×{s.clips.Length}" : "")))}");
             return am;
         }
 

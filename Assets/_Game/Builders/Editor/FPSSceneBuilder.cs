@@ -34,11 +34,25 @@ namespace Rishi.Builders
         // HDRI 中太阳的方向（由 HDR 最亮区域算出，Skybox/Panoramic 坐标系）
         static readonly Vector3 SunDirection = new Vector3(0.5543f, 0.7418f, -0.3775f);
 
+        /// <summary>
+        /// 两个场景共用的生成资源：Generated 下的文件夹、特效贴图与材质（FX_Soft 用于枪口火光、雨、萤火虫，FX_BulletHole 用于弹孔）、木箱材质。
+        /// 刚克隆的工程里没有这些，晨星岛生成器也会调用。
+        /// </summary>
+        internal static void EnsureSharedAssets()
+        {
+            foreach (var dir in new[] { Gen, Gen + "/Materials", Gen + "/Meshes", Gen + "/Textures" })
+                Directory.CreateDirectory(dir);
+            AssetDatabase.Refresh();
+            Sprite("FX_Soft", GenerateTexture("soft_dot", 64, SoftDot));
+            Sprite("FX_BulletHole", GenerateTexture("bullet_hole", 128, BulletHole));
+            Pbr("Crate", "Models/wooden_crate_02", 1f); // 晨星岛的沉船、营地、CG01 的船也用这个木头材质
+        }
+
         [MenuItem("Tools/FPS/重建测试场景")]
         public static void Build()
         {
-            foreach (var dir in new[] { Gen, Gen + "/Materials", Gen + "/Meshes", Gen + "/Textures", Path.GetDirectoryName(ScenePath) })
-                Directory.CreateDirectory(dir);
+            EnsureSharedAssets();
+            Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             if (AssetDatabase.IsValidFolder("Assets/Materials")) AssetDatabase.DeleteAsset("Assets/Materials"); // 旧版纯色材质
 
             EnsureWeaponLayer();
@@ -54,8 +68,8 @@ namespace Rishi.Builders
             var barrierMat = Pbr("Barrier", "Models/concrete_road_barrier", 1f);
             var barrelMat = Pbr("Barrel", "Models/Barrel_01", 1f);
             var targetMat = Painted("TargetPaint", new Color(0.78f, 0.75f, 0.68f), 0.55f, 0.4f);
-            var fxMat = Sprite("FX_Soft", GenerateTexture("soft_dot", 64, SoftDot));
-            var holeMat = Sprite("FX_BulletHole", GenerateTexture("bullet_hole", 128, BulletHole));
+            var fxMat = AssetDatabase.LoadAssetAtPath<Material>($"{Gen}/Materials/FX_Soft.mat");
+            var holeMat = AssetDatabase.LoadAssetAtPath<Material>($"{Gen}/Materials/FX_BulletHole.mat");
 
             // ---------- 场景 ----------
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);

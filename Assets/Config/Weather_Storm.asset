@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40578c427dc414faba0cc9c2611af63b, type: 3}
+  m_Name: Weather_Storm
+  m_EditorClassIdentifier: Rishi.World::Rishi.World.WeatherProfile
+  forceTimeOfDay: 1.5
+  waveScale: 1.55
+  fogDensity: 0.0016
+  fogColor: {r: 0.03, g: 0.04, b: 0.05, a: 1}
+  windBoost: 2.5
+  lightning: 1
+  flashInterval: {x: 3.5, y: 8}
