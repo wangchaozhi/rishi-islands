@@ -69,6 +69,14 @@ MonoBehaviour:
     pitch: {x: 1, y: 1}
     minDistance: 1
     maxDistance: 50
+  - id: amb_underwater
+    clips:
+    - {fileID: 8300000, guid: d3de60ebb80c95847a95b267e58dd228, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
   - id: amb_wind
     clips:
     - {fileID: 8300000, guid: 14f31cc14a991b243b882f3180d61155, type: 3}
@@ -77,6 +85,22 @@ MonoBehaviour:
     pitch: {x: 1, y: 1}
     minDistance: 1
     maxDistance: 50
+  - id: bag_close
+    clips:
+    - {fileID: 8300000, guid: 62bd97b7c7152194286b4b9ec07dc368, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
+  - id: bag_open
+    clips:
+    - {fileID: 8300000, guid: 582d179bae472484b9a5e273115a87df, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
   - id: bat_squeak
     clips:
     - {fileID: 8300000, guid: 25fc72f6dd2ced044a7b28842520d0ed, type: 3}
@@ -87,6 +111,16 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 2
     maxDistance: 40
+  - id: bubbles
+    clips:
+    - {fileID: 8300000, guid: ff467e5a0b6fccd4faefcaf358404298, type: 3}
+    - {fileID: 8300000, guid: 01f2dbd83a012484594ad11ee7f40829, type: 3}
+    - {fileID: 8300000, guid: 1905feb1fa5f1c7499a0cdae7cbfce70, type: 3}
+    category: 1
+    volume: 0.5
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 8
   - id: chest_open
     clips:
     - {fileID: 8300000, guid: de5d49012113b7347ab083d510e9a8cd, type: 3}
@@ -95,6 +129,14 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1.5
     maxDistance: 25
+  - id: clam_open
+    clips:
+    - {fileID: 8300000, guid: 80ff6a578850d104f8c84189cc943949, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 15
   - id: crab_click
     clips:
     - {fileID: 8300000, guid: 103191ad0bd8c9e49b8839b638e9ee4d, type: 3}
@@ -105,6 +147,30 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 12
+  - id: dive_under
+    clips:
+    - {fileID: 8300000, guid: 8e0b21a6fb62e044dbd5f889285117e7, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 10
+  - id: drown
+    clips:
+    - {fileID: 8300000, guid: 4b10821e0e143e04d8f56790114cc6ea, type: 3}
+    category: 3
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
+  - id: fish_scatter
+    clips:
+    - {fileID: 8300000, guid: 5772b39a220d11d42b78dc359a3bbb24, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 30
   - id: fish_splash
     clips:
     - {fileID: 8300000, guid: 5788c4a5cea88af4ea313b85e51b90ad, type: 3}
@@ -123,6 +189,15 @@ MonoBehaviour:
     pitch: {x: 1, y: 1}
     minDistance: 1
     maxDistance: 30
+  - id: gasp
+    clips:
+    - {fileID: 8300000, guid: 420dd064b794ce5478947bfe01a6eb83, type: 3}
+    - {fileID: 8300000, guid: 7c890ee4eae4e2a4ba6d669e6cb8a11e, type: 3}
+    category: 3
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
   - id: gun_empty
     clips:
     - {fileID: 8300000, guid: 1d5ab1e7949144845894ec29832bfdbc, type: 3}
@@ -147,6 +222,14 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 2
     maxDistance: 120
+  - id: heartbeat
+    clips:
+    - {fileID: 8300000, guid: d023a2fd1c5ccdd48ab802e4b2f66644, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 5
   - id: hull_crash
     clips:
     - {fileID: 8300000, guid: 50e245b6aa6d956468cb57b10012fa2e, type: 3}
@@ -187,6 +270,80 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 35
+  - id: item_drop
+    clips:
+    - {fileID: 8300000, guid: ffa30060a609830428af6cd9cf7241c4, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 8
+  - id: item_pickup
+    clips:
+    - {fileID: 8300000, guid: 48fe08f44d8778447b157d61da2331cb, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 8
+  - id: item_use
+    clips:
+    - {fileID: 8300000, guid: bc63550e560506946a3652ca04d3da18, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 8
+  - id: knock_three
+    clips:
+    - {fileID: 8300000, guid: cbc60ae84e0a7f64a9e4db5b50638132, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 6
+    maxDistance: 80
+  - id: machete_draw
+    clips:
+    - {fileID: 8300000, guid: 4902a5866a720eb49bf9b5a1cc6eaada, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 25
+  - id: machete_hit_flesh
+    clips:
+    - {fileID: 8300000, guid: 6e8ce6026214837429836e637a62af23, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 25
+  - id: machete_hit_stone
+    clips:
+    - {fileID: 8300000, guid: 2867b48054256224d806e782c4d142d8, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 25
+  - id: machete_hit_wood
+    clips:
+    - {fileID: 8300000, guid: 750238efc73595a4092710c52b0ab3fb, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 25
+  - id: machete_swing
+    clips:
+    - {fileID: 8300000, guid: f49d89ef46b7bf64489384d713e2994c, type: 3}
+    - {fileID: 8300000, guid: a14c0d7687e69ba4a863eeff5837ebdb, type: 3}
+    - {fileID: 8300000, guid: 6f1dd15b55e42ac428db00c54207fa88, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 25
   - id: note_paper
     clips:
     - {fileID: 8300000, guid: a4548d1615bdf8548b5e6f9c04e60cb4, type: 3}
@@ -219,6 +376,70 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1.5
     maxDistance: 45
+  - id: spear_hit_flesh
+    clips:
+    - {fileID: 8300000, guid: d3b6fe6005b825c458ea16ebf1ad0905, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 30
+  - id: spear_hit_hard
+    clips:
+    - {fileID: 8300000, guid: 3de5ec633c9facd4b9bdcaefcc00b6b7, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 30
+  - id: spear_hit_sand
+    clips:
+    - {fileID: 8300000, guid: bda3b61ab0bf55c44bbce52fc572bc90, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 30
+  - id: speargun_fire
+    clips:
+    - {fileID: 8300000, guid: 034580d90afe23b43a13393a17afddd6, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 30
+  - id: speargun_reload
+    clips:
+    - {fileID: 8300000, guid: bc3b0c0e42bbdf94f9a7a611ea48233a, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 30
+  - id: splash_big
+    clips:
+    - {fileID: 8300000, guid: 119e90246de7abd449bb10bf977ab044, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 30
+  - id: splash_enter
+    clips:
+    - {fileID: 8300000, guid: 2d680df49f3dda540a8170773ca82af4, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 30
+  - id: splash_small
+    clips:
+    - {fileID: 8300000, guid: 2e23f6791dde21940acfbb72e5f4c8a0, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 30
   - id: step_grass
     clips:
     - {fileID: 8300000, guid: 1967cb143e85d3741bb53a5455e9f166, type: 3}
@@ -312,6 +533,34 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 2
     maxDistance: 30
+  - id: surface_breach
+    clips:
+    - {fileID: 8300000, guid: c07d20bbb110b6d4f8992838fa9c5dac, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 10
+  - id: swim_stroke
+    clips:
+    - {fileID: 8300000, guid: efbfdcb4fb7f6f844becde6bc3270d2b, type: 3}
+    - {fileID: 8300000, guid: 478daeacf989221419df25a891aaa0d8, type: 3}
+    - {fileID: 8300000, guid: a2814b79ff9b404439ff86f334bc932e, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 10
+  - id: swim_under
+    clips:
+    - {fileID: 8300000, guid: d9d4daae3ae7b554babe225e5ba64878, type: 3}
+    - {fileID: 8300000, guid: 59bceac299810f449b0e1d23f5e5fd79, type: 3}
+    - {fileID: 8300000, guid: 4bfe06b9123617b4da32d25f7a5a1950, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 10
   - id: thunder
     clips:
     - {fileID: 8300000, guid: 2be23a2d09f5b454ea75d50b6f3b6bac, type: 3}
@@ -322,6 +571,22 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1.5
     maxDistance: 45
+  - id: ui_click
+    clips:
+    - {fileID: 8300000, guid: e0d841457c3b94b4c967680b05108338, type: 3}
+    category: 1
+    volume: 0.5
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
+  - id: water_exit
+    clips:
+    - {fileID: 8300000, guid: d01ca3ad5587db548950ade28bb20700, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 15
   - id: wave_crash
     clips:
     - {fileID: 8300000, guid: c52593b06f4c9eb46a21548464880013, type: 3}
@@ -330,3 +595,11 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1.5
     maxDistance: 45
+  - id: weapon_equip
+    clips:
+    - {fileID: 8300000, guid: e2a98a1e7e4f1a946acbcd238d9e524d, type: 3}
+    category: 1
+    volume: 0.6
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 8
