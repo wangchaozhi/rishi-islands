@@ -75,3 +75,7 @@ Thumbs.db
 /Assets/Machete01.meta
 /Assets/Rocklynn Productions - Water Splash Pack/
 /Assets/Rocklynn Productions - Water Splash Pack.meta
+
+# Python 缓存
+__pycache__/
+*.pyc
