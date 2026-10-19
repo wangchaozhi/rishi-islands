@@ -1,0 +1,65 @@
+# Unity 生成目录
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.pidb
+*.booproj
+*.unityproj
+.vs/
+.vscode/
+.idea/
+*.apk
+*.aab
+*.unitypackage
+sysinfo.txt
+crashlytics-build.properties
+.DS_Store
+Thumbs.db
+
+# 离线预览截图（README 用的缩略图在 Docs/images）
+/Screenshots/
+
+# Poly Haven CC0 下载资源（体积大，用 Tools/AssetFetch/fetch_all.py 重新下载）
+/Assets/Art/Models/
+/Assets/Art/Models.meta
+/Assets/Art/Textures/
+/Assets/Art/Textures.meta
+/Assets/Art/Terrain/
+/Assets/Art/Terrain.meta
+/Assets/Art/HDRI/
+/Assets/Art/HDRI.meta
+*.bak
+*.bak.meta
+
+# 编辑器脚本生成的资源（重建场景时自动生成）
+/Assets/Art/Generated/
+/Assets/Art/Generated.meta
+
+# Unity Asset Store 资源包：许可不允许公开分发，请自行从 Asset Store 免费导入
+/Assets/living birds/
+/Assets/living birds.meta
+/Assets/TerrainSampleAssets/
+/Assets/TerrainSampleAssets.meta
+/Assets/HDRPDefaultResources/
+/Assets/HDRPDefaultResources.meta
+
+# 由 Builders 生成的场景（克隆后运行重建命令得到）
+/Assets/Scenes/Island.unity
+/Assets/Scenes/Island.unity.meta
+/Assets/Scenes/Island/
+/Assets/Scenes/Island.meta
+/Assets/Scenes/FPSTest.unity
+/Assets/Scenes/FPSTest.unity.meta
+/Assets/Scenes/FPSTest/
+/Assets/Scenes/FPSTest.meta

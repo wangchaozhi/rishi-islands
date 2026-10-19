@@ -1,0 +1,19 @@
+{
+    "name": "Rishi.Story",
+    "rootNamespace": "Rishi.Story",
+    "references": [
+        "Rishi.Audio",
+        "Rishi.Core",
+        "Rishi.World",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

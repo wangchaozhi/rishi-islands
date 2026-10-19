@@ -1,0 +1,21 @@
+{
+    "name": "Rishi.UI",
+    "rootNamespace": "Rishi.UI",
+    "references": [
+        "Rishi.Audio",
+        "Rishi.Core",
+        "Rishi.Player",
+        "Rishi.Weapons",
+        "Rishi.World",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,22 @@
+{
+    "name": "Rishi.Weapons",
+    "rootNamespace": "Rishi.Weapons",
+    "references": [
+        "Rishi.Audio",
+        "Rishi.Core",
+        "Rishi.Player",
+        "Rishi.World",
+        "Unity.InputSystem",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Rishi.Wildlife",
+    "rootNamespace": "Rishi.Wildlife",
+    "references": [
+        "Rishi.Audio",
+        "Rishi.Core",
+        "Rishi.World",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

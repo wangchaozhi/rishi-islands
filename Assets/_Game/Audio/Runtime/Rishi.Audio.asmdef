@@ -1,0 +1,17 @@
+{
+    "name": "Rishi.Audio",
+    "rootNamespace": "Rishi.Audio",
+    "references": [
+        "Rishi.Core",
+        "Rishi.World"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
