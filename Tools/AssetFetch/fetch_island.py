@@ -80,7 +80,7 @@ def fetch_model(mid):
     out = os.path.join(ART, "Models", mid)
     files = get_json(API + mid)
     download(files["fbx"]["2k"]["fbx"]["url"], os.path.join(out, f"{mid}.fbx"))
-    groups = [p for p in ("", "branches_", "leaves_", "bark_") if (p + "arm") in files or (p == "" and "arm" in files)]
+    groups = [p for p in ("", "branches_", "leaves_", "bark_", "hull_", "rigging_", "sails_") if (p + "arm") in files or (p == "" and "arm" in files)]
     for p in groups:
         name = f"{mid}_{p}"
         if os.path.exists(os.path.join(out, name + "ao.png")):

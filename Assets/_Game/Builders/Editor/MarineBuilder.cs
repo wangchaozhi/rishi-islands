@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -89,8 +90,7 @@ namespace Rishi.Builders
             };
             var urchin = SaveMesh(MarineMeshes.Urchin("Urchin", 800));
             var starfish = new[] { SaveMesh(MarineMeshes.Starfish("Starfish_0", 900, 0.14f, new Color(0.85f, 0.32f, 0.12f))), SaveMesh(MarineMeshes.Starfish("Starfish_1", 901, 0.16f, new Color(0.15f, 0.32f, 0.72f))) };
-            var scallop = SaveMesh(MarineMeshes.Scallop("Scallop", new Color(0.92f, 0.62f, 0.5f)));
-            var conch = SaveMesh(MarineMeshes.Conch("Conch"));
+            var shellModel = ShellTemplate();
             var clamBottom = SaveMesh(MarineMeshes.ClamHalf("ClamBottom", 0.42f, 0.5f, false, new Color(0.72f, 0.7f, 0.6f), new Color(0.1f, 0.35f, 0.6f)));
             var clamTop = SaveMesh(MarineMeshes.ClamHalf("ClamTop", 0.42f, 0.5f, true, new Color(0.72f, 0.7f, 0.6f), new Color(0.1f, 0.35f, 0.6f)));
 
@@ -178,11 +178,18 @@ namespace Rishi.Builders
                     if (nStar < 80 && R() < 0.6f) { Place(gLife, starfish[rnd.Next(2)], mShell, pos + Vector3.up * 0.005f, yaw, Mathf.Lerp(0.8f, 1.3f, R()), false, shadows: false); nStar++; }
                     else if (nShell < 36)
                     {
-                        var go = Place(gPick, R() < 0.5f ? scallop : conch, mShell, pos + Vector3.up * 0.01f, yaw, Mathf.Lerp(1f, 1.4f, R()), false, shadows: false);
+                        if (shellModel == null) continue;
+                        var go = Object.Instantiate(shellModel, gPick);
                         go.name = "Shell";
+                        go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0) * Quaternion.Euler(R() < 0.6f ? 0f : 180f, 0, R() * 20f - 10f) * shellModel.transform.rotation);
+                        go.transform.localScale = shellModel.transform.localScale * Mathf.Lerp(0.85f, 1.2f, R());
+                        var sb = FPSSceneBuilder.Bounds(go);
+                        go.transform.position += Vector3.up * (pos.y - sb.min.y - sb.size.y * 0.25f);
+                        go.SetActive(true);
+                        foreach (var t in go.GetComponentsInChildren<Transform>()) t.gameObject.layer = MarineLayer;
                         var col = go.AddComponent<SphereCollider>();
                         col.isTrigger = true;
-                        col.radius = 0.15f;
+                        col.radius = 0.15f / Mathf.Max(go.transform.lossyScale.x, 1e-4f); // 模型缩得很小，碰撞球按世界尺寸算
                         var p = go.AddComponent<ItemPickup>();
                         p.item = shellItem;
                         p.verb = "捡起";
@@ -192,11 +199,32 @@ namespace Rishi.Builders
             }
             Debug.Log($"[Marine] seagrass {nGrass}, kelp {nKelp}, coral {nCoral}, urchin {nUrchin}, starfish {nStar}, shells {nShell}, clams {nClam}");
 
+            foreach (var t in shellTemplates) if (t != null) Object.DestroyImmediate(t);
+            shellTemplates.Clear();
             PlaceReefRocks(terrain, gReef, rnd);
             BuildTabletSite(terrain, spawn, root);
             BuildSunkenBoat(terrain, spawn, root);
             BuildFish();
         }
+
+        /// <summary>Poly Haven 的 Lambis 海螺，缩放到 22 厘米左右，作为贝壳拾取物的模板（隐藏，建完删除）。</summary>
+        static GameObject ShellTemplate()
+        {
+            if (FPSSceneBuilder.LoadModel("Models/lambis_shell") == null) return null;
+            var mat = IslandBuilder.PbrPrefix("LambisShell", "Models/lambis_shell", "lambis_shell_", false);
+            var go = FPSSceneBuilder.PlaceModel("Models/lambis_shell", mat, null, Vector3.down * 500f, 0f);
+            PrefabUtility.UnpackPrefabInstance(go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            var b = FPSSceneBuilder.Bounds(go);
+            float size = Mathf.Max(b.size.x, b.size.y, b.size.z);
+            if (size > 1e-4f) go.transform.localScale *= 0.22f / size;
+            foreach (var r in go.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
+            go.name = "ShellTemplate";
+            go.SetActive(false);
+            shellTemplates.Add(go);
+            return go;
+        }
+
+        static readonly List<GameObject> shellTemplates = new List<GameObject>();
 
         static GameObject Place(Transform parent, Mesh mesh, Material mat, Vector3 pos, float yaw, float scale, bool collider, bool shadows = true)
         {
@@ -337,6 +365,15 @@ namespace Rishi.Builders
             glow.color = new Color(0.9f, 0.7f, 0.35f);
             glow.shadows = LightShadows.None;
 
+            // 父亲留下的浮标：漂在石碑正上方，从岸上就能看见潜点
+            if (FPSSceneBuilder.LoadModel("Models/ocean_buoy") != null)
+            {
+                var buoyMat = IslandBuilder.PbrPrefix("OceanBuoy", "Models/ocean_buoy", "ocean_buoy_", false);
+                var buoy = FPSSceneBuilder.PlaceModel("Models/ocean_buoy", buoyMat, site, new Vector3(pos.x + 1.5f, GameSignals.SeaLevel - 0.4f, pos.z + 1f), yaw);
+                var bob = buoy.AddComponent<Rishi.World.FloatingBob>();
+                bob.waterline = buoy.transform.position.y - GameSignals.SeaLevel;
+            }
+
             // 父亲的潜水写字板，卡在石碑脚下
             var slateMat = FPSSceneBuilder.Painted("DiveSlate", new Color(0.88f, 0.9f, 0.86f), 0f, 0.4f);
             var slate = new GameObject("DiveSlate");
@@ -361,24 +398,29 @@ namespace Rishi.Builders
             var site = new GameObject("SunkenBoat").transform;
             site.SetParent(root);
             site.position = pos;
-            // 复制岸上沉船的船体（去掉剧情交互），缩小、侧翻，长满藻类
-            var source = GameObject.Find("Shipwreck");
-            if (source != null)
+            // Poly Haven「Dutch Ship Medium」（CC0）：只留船体（桅杆、索具、帆都烂掉了），侧翻、半埋，长满藻类
+            if (FPSSceneBuilder.LoadModel("Models/dutch_ship_medium") != null)
             {
-                var boat = Object.Instantiate(source, site);
-                boat.name = "SunkenHull";
-                foreach (var mb in boat.GetComponentsInChildren<MonoBehaviour>(true)) Object.DestroyImmediate(mb);
-                foreach (var l in boat.GetComponentsInChildren<Light>(true)) Object.DestroyImmediate(l.gameObject);
-                foreach (var a in boat.GetComponentsInChildren<AudioSource>(true)) Object.DestroyImmediate(a);
-                foreach (var z in boat.GetComponentsInChildren<AudioReverbZone>(true)) Object.DestroyImmediate(z);
-                boat.transform.localScale = source.transform.localScale * 0.6f;
-                boat.transform.rotation = Quaternion.Euler(8f, Random.Range(0f, 360f), 28f);
-                boat.transform.position = pos;
-                var bounds = FPSSceneBuilder.Bounds(boat);
-                boat.transform.position += Vector3.up * (pos.y - bounds.min.y - bounds.size.y * 0.3f);
-                var algae = new MaterialPropertyBlock();
-                algae.SetColor("_BaseColor", new Color(0.42f, 0.52f, 0.42f));
-                foreach (var r in boat.GetComponentsInChildren<Renderer>()) r.SetPropertyBlock(algae);
+                var prefab = FPSSceneBuilder.LoadModel("Models/dutch_ship_medium");
+                var ship = (GameObject)PrefabUtility.InstantiatePrefab(prefab, site);
+                PrefabUtility.UnpackPrefabInstance(ship, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+                var hullMat = IslandBuilder.PbrPrefix("SunkenDutchHull", "Models/dutch_ship_medium", "dutch_ship_medium_hull_", false);
+                hullMat.SetColor("_BaseColor", new Color(0.5f, 0.6f, 0.5f));
+                hullMat.SetFloat("_Smoothness", 0.5f);
+                foreach (var r in ship.GetComponentsInChildren<Renderer>().ToList())
+                {
+                    var n = (r.name + " " + string.Join(" ", r.sharedMaterials.Where(m => m != null).Select(m => m.name))).ToLower();
+                    if (!n.Contains("hull")) { Object.DestroyImmediate(r.gameObject); continue; }
+                    r.sharedMaterials = Enumerable.Repeat(hullMat, r.sharedMaterials.Length).ToArray();
+                }
+                ship.transform.rotation = Quaternion.Euler(6f, Random.Range(0f, 360f), 30f) * prefab.transform.localRotation;
+                ship.transform.position = pos;
+                var bounds = FPSSceneBuilder.Bounds(ship);
+                ship.transform.position += Vector3.up * (pos.y - bounds.min.y - bounds.size.y * 0.3f);
+                bounds = FPSSceneBuilder.Bounds(ship);
+                if (bounds.max.y > GameSignals.SeaLevel - 3f) ship.transform.position += Vector3.down * (bounds.max.y - (GameSignals.SeaLevel - 3f));
+                foreach (var mf in ship.GetComponentsInChildren<MeshFilter>()) mf.gameObject.AddComponent<MeshCollider>().sharedMesh = mf.sharedMesh;
+                Debug.Log($"[Marine] 沉船 {bounds.size}");
             }
 
             // 船边半埋的箱子

@@ -11,7 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
 
-for script in ("fetch_assets.py", "fetch_island.py", "fetch_ruin.py", "fetch_biomes.py"):
+for script in ("fetch_assets.py", "fetch_island.py", "fetch_ruin.py", "fetch_biomes.py", "fetch_marine.py"):
     print("==", script)
     sys.argv = [script, PROJECT]
     runpy.run_path(os.path.join(HERE, script), run_name="__main__")
