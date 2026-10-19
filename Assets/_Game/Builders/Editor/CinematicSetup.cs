@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f872b35522e248e40bb044539a3ffd27, type: 3}
+  m_Name: coconut
+  m_EditorClassIdentifier: Rishi.Inventory::Rishi.Inventory.ItemDef
+  id: coconut
+  displayName: "\u6930\u5B50"
+  description: "\u4ECE\u6930\u5B50\u6811\u4E0B\u6361\u7684\u9752\u6930\u5B50\uFF0C\u7528\u780D\u5200\u5288\u5F00\u5C31\u80FD\u559D\u3002"
+  category: 2
+  maxStack: 6
+  icon: {fileID: 0}
+  iconColor: {r: 0.42, g: 0.3, b: 0.16, a: 1}
+  iconGlyph: "\u6930"
+  usable: 1
+  useVerb: "\u559D"
+  useMessage: "\u6930\u6C41\u6E05\u751C\uFF0C\u4F60\u611F\u89C9\u597D\u591A\u4E86\u3002"
+  pickupSound: item_pickup

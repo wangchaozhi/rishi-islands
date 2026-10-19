@@ -45,6 +45,9 @@ python Tools/AssetFetch/fetch_all.py
 
 - **Terrain Sample Asset Pack**（Unity Technologies）：导入后如果自动装上了 HDRP，请在 Package Manager 里移除，项目使用 URP
 - **Living Birds**（不导入也能运行，只是没有鸟群）
+- **Fish - PolyPack**（Alstra Infinite，海里的鱼）
+- **Machete01**（Nikolay Fedorov，砍刀）
+- **Water Splash Pack**（Rocklynn Productions，入水出水和水下声音）
 
 最后生成场景（也可以在编辑器里用菜单 `Tools/Island`）：
 

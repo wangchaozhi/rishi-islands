@@ -8,6 +8,7 @@ using UnityEngine.Playables;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Timeline;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;

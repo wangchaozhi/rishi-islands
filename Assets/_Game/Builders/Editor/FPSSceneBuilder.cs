@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;
@@ -208,15 +209,37 @@ namespace Rishi.Builders
             var feel = holder.AddComponent<WeaponFeel>();
             feel.player = controller;
 
-            var gun = camGo.AddComponent<Gun>();
-            gun.weaponFeel = feel;
-            gun.muzzle = muzzle;
-            gun.muzzleLight = flash;
-            gun.hitMask = ~(1 << WeaponLayer);
+            // 背包：开局带着手枪和一个备用弹匣
+            var inventory = player.AddComponent<PlayerInventory>();
+            inventory.startItems.Add(new PlayerInventory.Stack { item = GameplaySetup.Item("pistol"), count = 1 });
+            inventory.startItems.Add(new PlayerInventory.Stack { item = GameplaySetup.Item("ammo_9mm"), count = 12 });
+
+            var weapons = camGo.AddComponent<WeaponController>();
+            weapons.slots = GameplaySetup.BuildViewModels(holder.transform, pistol, muzzle);
+            weapons.weaponFeel = feel;
+            weapons.muzzleLight = flash;
+            weapons.hitMask = ~(1 << WeaponLayer);
+            weapons.projectilePrefab = GameplaySetup.SpearPrefab();
+            SetLayerRecursive(holder, WeaponLayer);
+            for (int i = 1; i < weapons.slots.Count; i++) weapons.slots[i].viewModel.SetActive(false); // 默认拿手枪
+
+            // 游泳：氧气、气泡、水下画面和声音
+            var breath = player.AddComponent<Breath>();
+            breath.bubbles = MarineBuilder.Bubbles(camGo.transform);
+            camGo.AddComponent<UnderwaterAudio>();
+            var underwater = camGo.AddComponent<UnderwaterFX>();
+            underwater.volume = MarineBuilder.UnderwaterVolume();
+            underwater.particles = MarineBuilder.MarineSnow(camGo.transform);
+            underwater.causticFrames = MarineBuilder.CausticFrames();
+            underwater.marineLayer = MarineBuilder.MarineLayer;
 
             var hud = player.AddComponent<HUD>();
-            hud.gun = gun;
+            hud.weapons = weapons;
             hud.player = controller;
+
+            var bag = player.AddComponent<InventoryUI>();
+            bag.inventory = inventory;
+            bag.weapons = weapons;
         }
 
         /// <summary>

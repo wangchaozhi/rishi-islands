@@ -28,12 +28,13 @@ namespace Rishi.Audio
         readonly HashSet<string> zones = new HashSet<string>();
         Terrain terrain;
         float vegetation;
+        float underBlend;
 
         void Start()
         {
             Instance = this;
             terrain = Terrain.activeTerrain;
-            foreach (var id in new[] { "amb_ocean", "amb_wind", "amb_jungle_day", "amb_night", "amb_temple" })
+            foreach (var id in new[] { "amb_ocean", "amb_wind", "amb_jungle_day", "amb_night", "amb_temple", "amb_underwater" })
             {
                 var clip = AudioManager.Instance != null ? AudioManager.Instance.RandomClip(id) : null;
                 if (clip == null) continue;
@@ -73,6 +74,10 @@ namespace Rishi.Audio
             Set("amb_jungle_day", day * Mathf.Lerp(0.25f, 1f, vegetation) * indoor * 0.8f);
             Set("amb_night", (1f - day) * indoor * 0.75f);
             Set("amb_temple", inTemple ? 0.9f : 0f);
+            // 水下：岸上的声音几乎听不见，换成水下的低沉嗡鸣、远处的鲸歌和礁石上虾群的噼啪声
+            underBlend = Mathf.MoveTowards(underBlend, GameSignals.HeadUnderwater ? 1f : 0f, Time.deltaTime * 3f);
+            foreach (var l in layers.Values) if (l.id != "amb_underwater") l.target *= 1f - underBlend * 0.85f;
+            Set("amb_underwater", underBlend * 0.9f);
 
             float mul = AudioManager.Instance != null ? AudioManager.Instance.CategoryVolume(SoundCategory.Ambience) : 1f;
             foreach (var l in layers.Values)

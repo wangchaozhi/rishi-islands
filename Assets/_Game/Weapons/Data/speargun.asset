@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03af15518e2d82f428999c75410c9770, type: 3}
+  m_Name: speargun
+  m_EditorClassIdentifier: Rishi.Weapons::Rishi.Weapons.WeaponDef
+  id: speargun
+  displayName: "\u9C7C\u67AA"
+  kind: 2
+  item: {fileID: 11400000, guid: 78881cf68d501854394ce825f63be0fd, type: 2}
+  ammo: {fileID: 11400000, guid: 873fe8c9cc572f043add58098a6674e1, type: 2}
+  damage: 70
+  fireRate: 1.5
+  automatic: 0
+  range: 60
+  impactForce: 6
+  magazineSize: 1
+  reloadTime: 1.3
+  spread: 0.15
+  recoilUp: 2.5
+  recoilSide: 0.3
+  usableUnderwater: 1
+  usableOnLand: 1
+  projectileSpeed: 34
+  projectileSpeedUnderwater: 24
+  meleeRadius: 0.35
+  meleeHitDelay: 0.12
+  fireSound: speargun_fire
+  reloadSound: speargun_reload
+  emptySound: gun_empty
+  equipSound: weapon_equip

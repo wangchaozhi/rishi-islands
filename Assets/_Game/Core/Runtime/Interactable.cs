@@ -1,9 +1,6 @@
 using UnityEngine;
-using Rishi.Audio;
-using Rishi.Core;
-using Rishi.World;
 
-namespace Rishi.Story
+namespace Rishi.Core
 {
     /// <summary>可互动物体基类：玩家看着它按 E 触发。</summary>
     public abstract class Interactable : MonoBehaviour

@@ -14,7 +14,7 @@ namespace Rishi.Story
     {
         public static GameState Instance { get; private set; }
         /// <summary>阅读笔记、查看日志时为 true，玩家移动和射击会暂停。</summary>
-        public static bool InputBlocked { get => GameSignals.InputBlocked; set => GameSignals.InputBlocked = value; }
+        public static bool InputBlocked => GameSignals.InputBlocked;
 
         [TextArea] public string startObjective = "沙滩那头有一艘古老的沉船残骸，过去看看";
         public int totalFragments = 7;
@@ -24,13 +24,11 @@ namespace Rishi.Story
         public int Fragments { get; private set; }
         public readonly List<NoteData> Notes = new List<NoteData>();
 
-        public event Action<string> OnToast;
         public event Action<NoteData> OnNoteOpened;
 
         void Awake()
         {
             Instance = this;
-            InputBlocked = false;
             GameSignals.SetFragments(0);
             Objective = startObjective;
         }
@@ -61,7 +59,7 @@ namespace Rishi.Story
             Toast($"获得 太阳之心碎片（{Fragments}/{totalFragments}）");
         }
 
-        public void Toast(string text) => OnToast?.Invoke(text);
+        public void Toast(string text) => GameSignals.Toast(text);
     }
 
     [Serializable]

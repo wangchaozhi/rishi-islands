@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;

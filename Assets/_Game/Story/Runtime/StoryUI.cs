@@ -23,9 +23,9 @@ namespace Rishi.Story
 
         void Start()
         {
+            GameSignals.ToastRaised += t => toasts.Enqueue((t, Time.unscaledTime));
             var gs = GameState.Instance;
             if (gs == null) return;
-            gs.OnToast += t => toasts.Enqueue((t, Time.unscaledTime));
             // 记下打开的帧：同一次按 E 既打开又关闭
             gs.OnNoteOpened += n => { reading = n; journalOpen = false; lastOpenFrame = Time.frameCount; };
         }
@@ -48,7 +48,7 @@ namespace Rishi.Story
                 if (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame) journalIndex = (journalIndex + 1) % n;
             }
 
-            GameState.InputBlocked = reading != null || journalOpen;
+            GameSignals.SetInputBlock(this, reading != null || journalOpen);
             while (toasts.Count > 0 && Time.unscaledTime - toasts.Peek().time > 4f) toasts.Dequeue();
         }
 

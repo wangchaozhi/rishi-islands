@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;
@@ -149,7 +150,7 @@ namespace Rishi.Builders
         }
 
         /// <summary>笔记上方一盏很弱的暖光，夜里也能找到。</summary>
-        static void NoteGlow(Transform t)
+        internal static void NoteGlow(Transform t)
         {
             var l = new GameObject("Glow").AddComponent<Light>();
             l.transform.SetParent(t, false);
@@ -569,7 +570,7 @@ namespace Rishi.Builders
             return mat;
         }
 
-        static Vector3 Ground(Terrain terrain, Vector3 p)
+        internal static Vector3 Ground(Terrain terrain, Vector3 p)
         {
             p.y = terrain.SampleHeight(p) + terrain.transform.position.y;
             return p;

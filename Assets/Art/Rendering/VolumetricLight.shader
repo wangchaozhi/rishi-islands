@@ -34,8 +34,17 @@ Shader "Island/VolumetricLight"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
             float _Density, _Intensity, _Anisotropy, _MaxDistance, _HeightFalloff, _NightScale;
+            float _IslandUnderwater; // 水下时光柱更浓、带蓝绿色
 
             float Hash(float2 p) { return frac(52.9829189 * frac(dot(p, float2(0.06711056, 0.00583715)))); }
+
+            float Hash2Noise(float2 p)
+            {
+                float2 i = floor(p), f = frac(p);
+                float2 u = f * f * (3 - 2 * f);
+                float a = Hash(i), b = Hash(i + float2(1, 0)), c = Hash(i + float2(0, 1)), d = Hash(i + 1);
+                return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+            }
 
             half4 Frag(Varyings input) : SV_Target
             {
@@ -53,7 +62,7 @@ Shader "Island/VolumetricLight"
                 float3 ray = wpos - cam;
                 float dist = length(ray);
                 float3 dir = ray / max(dist, 1e-4);
-                dist = min(dist, _MaxDistance);
+                dist = min(dist, lerp(_MaxDistance, 35, _IslandUnderwater));
 
                 Light L = GetMainLight();
                 float g = _Anisotropy;
@@ -71,12 +80,20 @@ Shader "Island/VolumetricLight"
                     float3 p = cam + dir * ((i + jitter) * stepLen);
                     float shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(p));
                     float dens = _Density * exp(-max(p.y, 0) * _HeightFalloff);
+                    if (_IslandUnderwater > 0 && p.y < 0)
+                    {
+                        // 水下：浓得多的散射，加上水面波纹把阳光切成一条条光柱（沿光线方向投到水面上取噪声）
+                        float2 q = p.xz - L.direction.xz * (p.y / max(L.direction.y, 0.2));
+                        float shafts = Hash2Noise(q * 0.35 + _Time.y * 0.15) * Hash2Noise(q * 0.9 - _Time.y * 0.22);
+                        dens *= lerp(1, 14 * (0.25 + shafts * 2.2) * exp(p.y * 0.05), _IslandUnderwater);
+                    }
                     accum += shadow * dens * trans * stepLen;
                     trans *= exp(-dens * stepLen);
                 }
                 float lum = max(L.color.r, max(L.color.g, L.color.b));
                 float night = saturate(1 - lum * 2); // 月光很弱时放大一点，夜雾更明显
                 half3 scatter = accum * phase * L.color * _Intensity * (1 + night * _NightScale) * 4 * PI;
+                scatter *= lerp(half3(1, 1, 1), half3(0.35, 0.85, 0.9), _IslandUnderwater);
                 return half4(scene.rgb * lerp(1, trans, 0.25) + scatter, scene.a);
             }
             ENDHLSL

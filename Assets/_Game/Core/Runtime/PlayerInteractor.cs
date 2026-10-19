@@ -1,10 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Rishi.Audio;
-using Rishi.Core;
-using Rishi.World;
 
-namespace Rishi.Story
+namespace Rishi.Core
 {
     /// <summary>挂在主摄像机上：射线检测前方 3 米内的 Interactable，按 E 互动。</summary>
     public class PlayerInteractor : MonoBehaviour

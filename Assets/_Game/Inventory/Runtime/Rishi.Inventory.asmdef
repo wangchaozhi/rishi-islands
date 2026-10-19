@@ -1,0 +1,14 @@
+{
+    "name": "Rishi.Inventory",
+    "rootNamespace": "Rishi.Inventory",
+    "references": ["Rishi.Core", "Rishi.Audio", "Rishi.World", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

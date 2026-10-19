@@ -53,6 +53,11 @@ namespace Rishi.World
         [Tooltip(">= 0 时强制使用这个雾浓度（风暴等事件用）")]
         public float fogOverride = -1f;
 
+        [Header("水下（UnderwaterFX 写入）")]
+        [Range(0, 1)] public float underwater;
+        public Color underwaterColor = new Color(0.05f, 0.3f, 0.36f);
+        public float underwaterDensity = 0.05f;
+
         float envTimer;
         int probeRenderId = -1;
         float rushTarget = -1f, rushRate;
@@ -140,6 +145,11 @@ namespace Rishi.World
             // 清晨薄雾：5 点起渐浓，日出后约 8 点半散去
             float mist = Mathf.Clamp01(1f - Mathf.Abs(timeOfDay - 7.0f) / 2.0f);
             RenderSettings.fogDensity = fogOverride >= 0f ? fogOverride : baseFogDensity * (1f + morningMist * mist * mist);
+            if (underwater > 0f)
+            {
+                RenderSettings.fogColor = Color.Lerp(RenderSettings.fogColor, underwaterColor, underwater);
+                RenderSettings.fogDensity = Mathf.Lerp(RenderSettings.fogDensity, underwaterDensity, underwater);
+            }
 
             if (!updateEnvironment) return;
             envTimer -= Time.deltaTime;

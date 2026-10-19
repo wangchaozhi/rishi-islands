@@ -47,7 +47,7 @@ Shader "Island/Ocean"
             Name "ForwardLit"
             Tags { "LightMode" = "UniversalForward" }
             ZWrite On
-            Cull Back
+            Cull Off // 水下能看到水面的背面
             Blend Off
 
             HLSLPROGRAM
@@ -153,7 +153,32 @@ Shader "Island/Ocean"
                 return lerp(lerp(Hash(i), Hash(i + float2(1, 0)), u.x), lerp(Hash(i + float2(0, 1)), Hash(i + 1), u.x), u.y);
             }
 
-            half4 frag(Varyings i) : SV_Target
+            float _IslandUnderwater; // UnderwaterFX 写入：摄像机在水下时为 1
+
+            // 从水下往上看：斯涅尔窗口内透出天空和太阳，窗口外是全反射的深水色
+            half3 Underside(Varyings i, float3 N, float3 V, float2 screenUV)
+            {
+                float3 Nb = -N;
+                float cosT = saturate(dot(Nb, V));
+                float window = smoothstep(0.6, 0.76, cosT); // 临界角约 48.6°
+                // 折射进来的方向（从水下看出去）
+                float3 refr = refract(-V, Nb, 1.33);
+                if (dot(refr, refr) < 1e-4) refr = reflect(-V, Nb);
+                half3 sky = GlossyEnvironmentReflection(refr, 0.05, 1);
+                Light mainLight = GetMainLight();
+                half3 lightCol = mainLight.color * mainLight.distanceAttenuation;
+                half3 ambient = SampleSH(half3(0, 1, 0));
+                float sunUp = saturate(mainLight.direction.y);
+                float sunGlint = pow(saturate(dot(refr, mainLight.direction)), 400) * 40 + pow(saturate(dot(refr, mainLight.direction)), 20) * 0.6;
+                half3 through = (sky * 0.85 + lightCol * sunGlint * sunUp) * half3(0.75, 0.95, 1.0);
+                half3 tir = _DeepColor.rgb * (ambient * 0.9 + lightCol * sunUp * 0.25);
+                // 波纹边缘的亮线
+                float ripple = pow(1 - abs(dot(N, float3(0, 1, 0))), 3) * 2;
+                half3 col = lerp(tir, through, window) + lightCol * ripple * 0.06 * sunUp;
+                return col;
+            }
+
+            half4 frag(Varyings i, FRONT_FACE_TYPE face : FRONT_FACE_SEMANTIC) : SV_Target
             {
                 float3 posWS = i.positionWS;
                 float3 V = normalize(_WorldSpaceCameraPos - posWS);
@@ -171,6 +196,11 @@ Shader "Island/Ocean"
 
                 // 屏幕空间：场景深度、折射
                 float2 screenUV = GetNormalizedScreenSpaceUV(i.positionCS);
+                if (!IS_FRONT_VFACE(face, true, false) || _WorldSpaceCameraPos.y < posWS.y - 0.02)
+                {
+                    half3 uc = Underside(i, N, V, screenUV);
+                    return half4(MixFog(uc, i.fogFactor), 1);
+                }
                 float surfaceEye = LinearEyeDepth(i.positionCS.z, _ZBufferParams);
                 float sceneEye = LinearEyeDepth(SampleSceneDepth(screenUV), _ZBufferParams);
                 float thickness = max(0, sceneEye - surfaceEye);

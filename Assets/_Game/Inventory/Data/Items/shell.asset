@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f872b35522e248e40bb044539a3ffd27, type: 3}
+  m_Name: shell
+  m_EditorClassIdentifier: Rishi.Inventory::Rishi.Inventory.ItemDef
+  id: shell
+  displayName: "\u8D1D\u58F3"
+  description: "\u6D77\u5E95\u6361\u5230\u7684\u8D1D\u58F3\uFF0C\u82B1\u7EB9\u5F88\u6F02\u4EAE\u3002"
+  category: 3
+  maxStack: 30
+  icon: {fileID: 0}
+  iconColor: {r: 0.92, g: 0.72, b: 0.6, a: 1}
+  iconGlyph: "\u8D1D"
+  usable: 0
+  useVerb: "\u4F7F\u7528"
+  useMessage: 
+  pickupSound: item_pickup

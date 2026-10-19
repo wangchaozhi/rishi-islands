@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;
@@ -42,6 +43,25 @@ namespace Rishi.Builders
             ("crab_", SoundCategory.Sfx, 0.45f, 1f, 12f),
             ("fish_", SoundCategory.Sfx, 0.6f, 2f, 30f),
             ("bat_", SoundCategory.Sfx, 0.45f, 2f, 40f),
+            ("knock_three", SoundCategory.Sfx, 1f, 6f, 80f),
+            ("heartbeat", SoundCategory.Sfx, 0.9f, 1f, 5f),
+            ("splash_", SoundCategory.Sfx, 0.8f, 1.5f, 30f),
+            ("water_exit", SoundCategory.Sfx, 0.6f, 1f, 15f),
+            ("swim_", SoundCategory.Sfx, 0.6f, 1f, 10f),
+            ("dive_", SoundCategory.Sfx, 0.7f, 1f, 10f),
+            ("surface_", SoundCategory.Sfx, 0.7f, 1f, 10f),
+            ("bubbles", SoundCategory.Sfx, 0.5f, 1f, 8f),
+            ("gasp", SoundCategory.Voice, 0.9f, 1f, 5f),
+            ("drown", SoundCategory.Voice, 1f, 1f, 5f),
+            ("item_", SoundCategory.Sfx, 0.7f, 1f, 8f),
+            ("bag_", SoundCategory.Sfx, 0.6f, 1f, 5f),
+            ("ui_", SoundCategory.Sfx, 0.5f, 1f, 5f),
+            ("weapon_", SoundCategory.Sfx, 0.6f, 1f, 8f),
+            ("machete_", SoundCategory.Sfx, 0.8f, 1f, 25f),
+            ("speargun_", SoundCategory.Sfx, 0.85f, 1f, 30f),
+            ("spear_hit", SoundCategory.Sfx, 0.8f, 1f, 30f),
+            ("clam_", SoundCategory.Sfx, 0.8f, 1f, 15f),
+            ("fish_scatter", SoundCategory.Sfx, 0.5f, 1f, 15f),
         };
 
         public static AudioManager CreateManager()
@@ -63,6 +83,28 @@ namespace Rishi.Builders
                 }
             }
 
+            // 商店音效（Water Splash Pack, Rocklynn Productions）替换对应的临时音效
+            const string splash = "Assets/Rocklynn Productions - Water Splash Pack/";
+            var store = new Dictionary<string, string[]>
+            {
+                ["splash_enter"] = new[] { "WaterSplash_In_Short1", "WaterSplash_In_Short2", "WaterSplash_In_Short3", "WaterSplash_In_Short4", "WaterSplash_In_Short5" },
+                ["splash_big"] = new[] { "WaterSplash_Long", "WaterSplash_Medium" },
+                ["splash_small"] = new[] { "WaterSplash_In_Short3", "WaterSplash_In_Short5" },
+                ["water_exit"] = new[] { "WaterSplash_Out_Short1", "WaterSplash_Out_Short2", "WaterSplash_Out_Short3" },
+                ["surface_breach"] = new[] { "WaterEmerge_Out_Medium", "WaterEmerge_Out_Slow" },
+                ["dive_under"] = new[] { "WaterSubmerge_In", "WaterSplash_Underwater" },
+                ["swim_stroke"] = new[] { "WaterSplash_Out_Short1", "WaterSplash_Out_Short2", "WaterSplash_Out_Short3" },
+                ["swim_under"] = new[] { "Underwater_Medium" },
+                ["amb_underwater"] = new[] { "Underwater_Long" },
+            };
+            foreach (var kv in store)
+            {
+                var list = kv.Value.Select(n => AssetDatabase.LoadAssetAtPath<AudioClip>(splash + n + ".wav")).Where(c => c != null).ToList();
+                if (list.Count == 0) continue;
+                foreach (var c in list) ConfigureImport(AssetDatabase.GetAssetPath(c), kv.Key);
+                clips[kv.Key] = list;
+            }
+
             var go = new GameObject("AudioManager");
             var am = go.AddComponent<AudioManager>();
             foreach (var kv in clips.OrderBy(k => k.Key))
@@ -76,7 +118,7 @@ namespace Rishi.Builders
                     s.minDistance = rule.min;
                     s.maxDistance = rule.max;
                 }
-                if (kv.Key.StartsWith("amb_") || kv.Key.StartsWith("puzzle_") || kv.Key.StartsWith("fragment_")) s.pitch = Vector2.one;
+                if (kv.Key.StartsWith("amb_") || kv.Key.StartsWith("puzzle_") || kv.Key.StartsWith("fragment_") || kv.Key == "heartbeat" || kv.Key == "knock_three") s.pitch = Vector2.one;
                 am.sounds.Add(s);
             }
             Debug.Log($"[Audio] {am.sounds.Count} sounds: {string.Join(", ", am.sounds.Select(s => s.id + (s.clips.Length > 1 ? $"×{s.clips.Length}" : "")))}");

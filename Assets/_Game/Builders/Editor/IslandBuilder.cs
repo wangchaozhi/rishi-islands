@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;
@@ -28,9 +29,9 @@ namespace Rishi.Builders
     {
         public const string ScenePath = "Assets/Scenes/Island.unity";
         const string Art = "Assets/Art";
-        const string Gen = "Assets/Art/Generated/Island";
-        const float Size = 600f;
-        const float MinHeight = -20f;
+        internal const string Gen = "Assets/Art/Generated/Island";
+        internal const float Size = 600f;
+        internal const float MinHeight = -20f;
         const float HeightRange = 100f;
         const int HeightRes = 1025;
         const int AlphaRes = 1024;
@@ -126,6 +127,10 @@ namespace Rishi.Builders
             PlaceRocks(terrain);
             PaintDetails(terrain);
 
+            // ---------- 海底世界 ----------
+            MarineBuilder.Build(terrain, spawnPoint);
+            GameplaySetup.PlacePickups(terrain, spawnPoint);
+
             // ---------- 后处理 ----------
             FPSSceneBuilder.CreateVolume("IslandPostProcess", temperature: -1f, saturation: -4f, contrast: 5f);
 
@@ -142,6 +147,7 @@ namespace Rishi.Builders
             cam.farClipPlane = 3000f;
             var hud = player.GetComponent<HUD>();
             hud.dayNight = cycle;
+            cam.GetComponent<UnderwaterFX>().dayNight = cycle;
 
             // ---------- 声音 ----------
             AudioSetup.CreateManager();
@@ -214,6 +220,7 @@ namespace Rishi.Builders
             // 海床 -> 浅滩 -> 沙滩 -> 后滩
             float h = Mathf.Lerp(-18f, -1.2f, SmoothStep(0f, 0.32f, coast))
                     + Mathf.Lerp(0f, 3.8f, SmoothStep(0.26f, 0.62f, coast));
+            h = MarineBuilder.ShapeSeabed(x, z, h); // 海底：沙波、礁盘、外缘陡坡
 
             // 沙滩后面是低矮起伏的丛林丘陵（最高十几米），没有高山
             float inland = SmoothStep(0.62f, 1f, coast);
@@ -385,6 +392,18 @@ namespace Rishi.Builders
                     float k = 1f - Mathf.Clamp01(rock + w[8]);
                     for (int l = 0; l <= 3; l++) w[l] *= k;
                     w[5] *= 1f - rock; w[6] *= 1f - rock * 0.5f; w[9] *= 1f - rock * 0.5f;
+
+                    // 水下：白沙为主，礁盘是礁石，零星的碎石带
+                    float uw = 1f - SmoothStep(-1.6f, -0.7f, h);
+                    if (uw > 0f)
+                    {
+                        float reef = MarineBuilder.ReefMask(x, z);
+                        float gravel = SmoothStep(0.62f, 0.75f, Mathf.PerlinNoise(x * 0.05f + 3f, z * 0.05f + 8f));
+                        for (int l = 0; l < LayerCount; l++) w[l] *= 1f - uw;
+                        w[1] += uw * (1f - reef) * (1f - gravel * 0.5f);
+                        w[9] += uw * reef * 1.3f;
+                        w[6] += uw * gravel * 0.5f * (1f - reef);
+                    }
 
                     float sum = 0;
                     for (int l = 0; l < LayerCount; l++) sum += w[l];
@@ -777,7 +796,7 @@ namespace Rishi.Builders
         // ================= 工具 =================
 
         /// <summary>带前缀贴图组的 PBR 材质；cutout 为 true 时是双面 Alpha 裁剪（叶片、草）。</summary>
-        static Material PbrPrefix(string name, string folder, string prefix, bool cutout)
+        internal static Material PbrPrefix(string name, string folder, string prefix, bool cutout)
         {
             string dir = $"{Art}/{folder}";
             var mat = MakeMaterial(name, "Universal Render Pipeline/Lit");
@@ -804,7 +823,7 @@ namespace Rishi.Builders
             return mat;
         }
 
-        static Material MakeMaterial(string name, string shaderName)
+        internal static Material MakeMaterial(string name, string shaderName)
         {
             string path = $"{Gen}/Materials/{name}.mat";
             var shader = Shader.Find(shaderName);
@@ -843,7 +862,7 @@ namespace Rishi.Builders
             AssetDatabase.CreateAsset(obj, path);
         }
 
-        static bool Sample(Terrain terrain, float x, float z, out float height, out float slope, out float[] weights)
+        internal static bool Sample(Terrain terrain, float x, float z, out float height, out float slope, out float[] weights)
         {
             var data = terrain.terrainData;
             float u = x / Size + 0.5f, v = z / Size + 0.5f;

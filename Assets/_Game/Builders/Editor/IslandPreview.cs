@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Rishi.Core;
+using Rishi.Inventory;
 using Rishi.World;
 using Rishi.Audio;
 using Rishi.Player;
@@ -95,6 +96,11 @@ namespace Rishi.Builders
             Shot(cam, player, root, cycle, ocean, beach, SkyYaw(toMoon), SkyPitch(toMoon) + 4f, 7.3f, "16_morning_moon");
             sky.SetFloat("_CloudCoverage", coverage);
 
+            // ---------- 水下 ----------
+            CaptureUnderwater(cam, player, root, cycle, ocean, terrain, spawn);
+            // ---------- 武器 ----------
+            CaptureWeapons(cam, player, root, cycle, ocean, spawn, spawnYaw);
+
             // 地形细节在离线渲染里画不出来，手动摆一圈高灌丛检查外观
             var undergrowth = new GameObject("UndergrowthPreview").transform;
             var shrubCenter = new Vector3(25f, 0, 40f);
@@ -158,15 +164,147 @@ namespace Rishi.Builders
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
+        /// <summary>在出生点附近找一块满足条件的海床（找不到返回 false）。</summary>
+        static bool FindSeabed(Terrain terrain, Vector3 near, float minDepth, float maxDepth, System.Func<float, float, bool> ok, out Vector3 pos)
+        {
+            for (float r = 20f; r < 220f; r += 6f)
+                for (float a = 0f; a < 360f; a += 9f)
+                {
+                    float x = near.x + Mathf.Sin(a * Mathf.Deg2Rad) * r, z = near.z + Mathf.Cos(a * Mathf.Deg2Rad) * r;
+                    float h = terrain.SampleHeight(new Vector3(x, 0, z)) + terrain.transform.position.y;
+                    if (-h < minDepth || -h > maxDepth || !ok(x, z)) continue;
+                    pos = new Vector3(x, h, z);
+                    return true;
+                }
+            pos = default;
+            return false;
+        }
+
+        static void UnderShot(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, UnderwaterFX ufx,
+                              Vector3 eye, float yaw, float pitch, float time, string name)
+        {
+            var pos = eye - Vector3.up * root.localPosition.y;
+            Shot(cam, player, root, cycle, ocean, pos, yaw, pitch, time, name, ufx);
+        }
+
+        /// <summary>离线渲染不跑 MarineLife，手动在镜头前摆几群鱼看外观。</summary>
+        static Transform FishPreview(Vector3 eye, float yaw)
+        {
+            var life = Object.FindFirstObjectByType<MarineLife>();
+            var t = new GameObject("FishPreview").transform;
+            if (life == null) return t;
+            var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward;
+            var right = Quaternion.Euler(0, yaw, 0) * Vector3.right;
+            int si = 0;
+            foreach (var sp in life.species)
+            {
+                int n = Mathf.Clamp(sp.schoolSize.y, 1, 30);
+                var center = eye + fwd * (3.5f + si * 1.4f) + right * ((si % 3) - 1) * 2.2f + Vector3.up * ((si % 2) * 0.8f - 0.6f);
+                if (sp.habitat == MarineLife.Habitat.Seabed) center += Vector3.down * 0.8f;
+                for (int i = 0; i < n; i++)
+                {
+                    var go = new GameObject(sp.name);
+                    go.transform.SetParent(t);
+                    GameObject model;
+                    if (sp.prefab != null)
+                    {
+                        model = Object.Instantiate(sp.prefab, go.transform, false);
+                        model.transform.localScale = sp.prefab.transform.localScale * sp.modelScale;
+                    }
+                    else
+                    {
+                        model = new GameObject("Model");
+                        model.transform.SetParent(go.transform, false);
+                        model.AddComponent<MeshFilter>().sharedMesh = sp.mesh;
+                        model.AddComponent<MeshRenderer>().sharedMaterial = sp.material;
+                    }
+                    model.transform.localRotation = Quaternion.Euler(sp.modelEuler);
+                    go.transform.position = center + Vector3.Scale(Random.insideUnitSphere, new Vector3(1.3f, 0.5f, 1f)) * Mathf.Min(sp.spread, 1.6f);
+                    go.transform.rotation = Quaternion.Euler(Random.Range(-8f, 8f), yaw + 90f + Random.Range(-20f, 20f), 0);
+                    go.transform.localScale = Vector3.one * Mathf.Lerp(sp.scale.x, sp.scale.y, Random.value);
+                }
+                si++;
+            }
+            return t;
+        }
+
+        static void CaptureUnderwater(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Terrain terrain, Vector3 spawn)
+        {
+            var ufx = cam.GetComponent<UnderwaterFX>();
+            if (ufx == null) return;
+            if (FindSeabed(terrain, spawn, 5f, 9f, (x, z) => MarineBuilder.ReefMask(x, z) > 0.7f, out var reef))
+            {
+                var eye = reef + Vector3.up * 2.6f;
+                var fish = FishPreview(eye + Vector3.down * 0.6f, 30f);
+                UnderShot(cam, player, root, cycle, ocean, ufx, eye, 30f, 22f, 11f, "17_underwater_reef");
+                Object.DestroyImmediate(fish.gameObject);
+                UnderShot(cam, player, root, cycle, ocean, ufx, eye, 210f, -55f, 11f, "18_surface_from_below");
+            }
+            else Debug.LogWarning("[Preview] 没找到礁盘");
+            if (FindSeabed(terrain, spawn, 2.5f, 6f, (x, z) => MarineBuilder.MeadowMask(x, z) > 0.75f && MarineBuilder.ReefMask(x, z) < 0.2f, out var meadow))
+                UnderShot(cam, player, root, cycle, ocean, ufx, meadow + Vector3.up * 1.1f, 120f, 12f, 10f, "19_seagrass");
+            else Debug.LogWarning("[Preview] 没找到海草床");
+            if (FindSeabed(terrain, spawn, 11f, 17f, (x, z) => MarineBuilder.KelpMask(x, z) > 0.75f, out var kelp))
+                UnderShot(cam, player, root, cycle, ocean, ufx, kelp + Vector3.up * 2f, 60f, -18f, 12f, "20_kelp_forest");
+            else Debug.LogWarning("[Preview] 没找到海带林");
+            var tablet = GameObject.Find("SeaTablet");
+            if (tablet != null)
+            {
+                var tp = tablet.transform.position;
+                var eye = tp + tablet.transform.forward * 3.2f + Vector3.up * 0.7f;
+                float yaw = Mathf.Atan2(tp.x - eye.x, tp.z - eye.z) * Mathf.Rad2Deg;
+                UnderShot(cam, player, root, cycle, ocean, ufx, eye, yaw, 6f, 11f, "21_sea_tablet");
+            }
+            var boat = GameObject.Find("SunkenBoat");
+            if (boat != null)
+            {
+                var bp = boat.transform.position;
+                var eye = bp + new Vector3(5f, 2.5f, -5f);
+                float yaw = Mathf.Atan2(bp.x - eye.x, bp.z - eye.z) * Mathf.Rad2Deg;
+                UnderShot(cam, player, root, cycle, ocean, ufx, eye, yaw, 18f, 11f, "22_sunken_boat");
+            }
+            // 恢复到岸上
+            player.position = spawn;
+            ufx.ApplyNow();
+        }
+
+        static void CaptureWeapons(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn, float yaw)
+        {
+            var wc = cam.GetComponent<WeaponController>();
+            if (wc == null) return;
+            for (int i = 0; i < wc.slots.Count; i++)
+            {
+                for (int k = 0; k < wc.slots.Count; k++) wc.slots[k].viewModel.SetActive(k == i);
+                Shot(cam, player, root, cycle, ocean, spawn, yaw + 40f, 4f, 10f, $"23_weapon_{wc.slots[i].def.id}");
+            }
+            for (int k = 0; k < wc.slots.Count; k++) wc.slots[k].viewModel.SetActive(k == 0);
+            var machete = GameObject.Find("MachetePickup");
+            if (machete != null)
+            {
+                var mp = machete.transform.position;
+                var eye = mp + new Vector3(1.4f, 0f, -1.4f);
+                Shot(cam, player, root, cycle, ocean, new Vector3(eye.x, mp.y + 0.6f, eye.z), Mathf.Atan2(mp.x - eye.x, mp.z - eye.z) * Mathf.Rad2Deg, 30f, 10f, "24_machete_pickup");
+            }
+            var gun = GameObject.Find("SpeargunPickup");
+            if (gun != null)
+            {
+                var gp = gun.transform.position;
+                var eye = gp + new Vector3(-1.3f, 0f, -1.3f);
+                Shot(cam, player, root, cycle, ocean, new Vector3(eye.x, gp.y + 0.6f, eye.z), Mathf.Atan2(gp.x - eye.x, gp.z - eye.z) * Mathf.Rad2Deg, 30f, 10f, "25_speargun_pickup");
+            }
+        }
+
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);
 
         static void Shot(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean,
-                         Vector3 pos, float yaw, float pitch, float time, string name)
+                         Vector3 pos, float yaw, float pitch, float time, string name, UnderwaterFX ufx = null)
         {
             player.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
             root.localRotation = Quaternion.Euler(pitch, 0, 0);
             cycle.timeOfDay = time;
+            if (ufx != null) ufx.ApplyNow();
             cycle.Apply(false);
+            if (ufx != null) ufx.ApplyNow();
             DynamicGI.UpdateEnvironment();
             if (cycle.skyProbe != null)
             {

@@ -34,6 +34,7 @@ namespace Rishi.Player
             Vector3 v = cc.velocity;
             v.y = 0;
             bool grounded = cc.isGrounded;
+            if (player != null && player.IsSwimming) { distance = 0; wasGrounded = true; airTime = 0; return; } // 游泳时没有脚步声
 
             if (grounded)
             {

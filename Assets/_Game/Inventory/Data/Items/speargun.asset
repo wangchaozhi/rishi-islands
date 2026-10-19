@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f872b35522e248e40bb044539a3ffd27, type: 3}
+  m_Name: speargun
+  m_EditorClassIdentifier: Rishi.Inventory::Rishi.Inventory.ItemDef
+  id: speargun
+  displayName: "\u9C7C\u67AA"
+  description: "\u7236\u4EB2\u8425\u5730\u91CC\u7684\u6A61\u76AE\u7B4B\u9C7C\u67AA\u3002\u5728\u6C34\u4E0B\u53C8\u51C6\u53C8\u72E0\uFF0C\u5CB8\u4E0A\u4E5F\u80FD\u7528\uFF0C\u53EA\u662F\u77DB\u4F1A\u5F80\u4E0B\u6389\u3002\n\u5C04\u51FA\u53BB\u7684\u77DB\u8BB0\u5F97\u6E38\u8FC7\u53BB\u62D4\u56DE\u6765\u3002"
+  category: 0
+  maxStack: 1
+  icon: {fileID: 0}
+  iconColor: {r: 0.22, g: 0.42, b: 0.52, a: 1}
+  iconGlyph: "\u53C9"
+  usable: 0
+  useVerb: "\u4F7F\u7528"
+  useMessage: 
+  pickupSound: item_pickup

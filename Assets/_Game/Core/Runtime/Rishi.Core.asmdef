@@ -1,7 +1,9 @@
 {
     "name": "Rishi.Core",
     "rootNamespace": "Rishi.Core",
-    "references": [],
+    "references": [
+        "Unity.InputSystem"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

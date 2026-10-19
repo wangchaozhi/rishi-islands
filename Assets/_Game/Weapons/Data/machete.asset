@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03af15518e2d82f428999c75410c9770, type: 3}
+  m_Name: machete
+  m_EditorClassIdentifier: Rishi.Weapons::Rishi.Weapons.WeaponDef
+  id: machete
+  displayName: "\u780D\u5200"
+  kind: 1
+  item: {fileID: 11400000, guid: cda8c4e4d2fc8cc43a8f3d3c07abf978, type: 2}
+  ammo: {fileID: 0}
+  damage: 45
+  fireRate: 1.8
+  automatic: 0
+  range: 2.3
+  impactForce: 3
+  magazineSize: 0
+  reloadTime: 1.4
+  spread: 0
+  recoilUp: 1.6
+  recoilSide: 0.5
+  usableUnderwater: 1
+  usableOnLand: 1
+  projectileSpeed: 38
+  projectileSpeedUnderwater: 22
+  meleeRadius: 0.35
+  meleeHitDelay: 0.14
+  fireSound: machete_swing
+  reloadSound: 
+  emptySound: 
+  equipSound: machete_draw
