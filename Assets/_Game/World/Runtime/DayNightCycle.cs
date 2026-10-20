@@ -96,6 +96,7 @@ namespace Rishi.World
                 {
                     float speed = 24f / (c.dayLengthMinutes * 60f);
                     if (c.slowUntilFirstFragment && GameSignals.Fragments == 0) speed *= c.firstDaySpeed;
+                    if (SunElevation < -0.05f) speed *= c.NightSpeed(GameSignals.Fragments); // 碎片越多，夜越长
                     var kb = Keyboard.current;
                     if (kb != null && kb.tKey.isPressed) speed *= c.fastForwardMultiplier;
                     timeOfDay = Mathf.Repeat(timeOfDay + speed * Time.deltaTime, 24f);
@@ -146,7 +147,7 @@ namespace Rishi.World
             RenderSettings.fogColor = fog;
             // 清晨薄雾：5 点起渐浓，日出后约 8 点半散去
             float mist = Mathf.Clamp01(1f - Mathf.Abs(timeOfDay - 7.0f) / 2.0f);
-            RenderSettings.fogDensity = fogOverride >= 0f ? fogOverride : c.baseFogDensity * (1f + c.morningMist * mist * mist) * Mathf.Lerp(1f, c.nightFogMultiplier, night) * weatherFog;
+            RenderSettings.fogDensity = fogOverride >= 0f ? fogOverride : c.baseFogDensity * (1f + c.morningMist * mist * mist) * Mathf.Lerp(1f, c.nightFogMultiplier, night) * c.FragmentFog(GameSignals.Fragments, night) * weatherFog;
             if (fogOverride < 0f && weatherFogTint > 0f)
             {
                 // 天气的雾色按当前亮度缩放，阴雨天的白天是灰白、夜里仍然是暗的

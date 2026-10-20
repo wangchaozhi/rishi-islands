@@ -199,6 +199,13 @@ namespace Rishi.Builders
             CaptureCreature(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureShade(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureFirstNight(cam, player, root, cycle, ocean);
+            // 碎片的代价：同一个黄昏视角，0 块碎片和 4 块碎片时的雾
+            foreach (var (n, file) in new[] { (0, "47_dusk_fragments0"), (4, "48_dusk_fragments4") })
+            {
+                GameSignals.SetFragments(n);
+                Shot(cam, player, root, cycle, ocean, spawn, spawnYaw + 150f, -2f, 19.6f, file);
+            }
+            GameSignals.SetFragments(0);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 

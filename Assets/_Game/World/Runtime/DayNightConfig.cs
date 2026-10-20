@@ -46,6 +46,21 @@ namespace Rishi.World
         [Tooltip("夜里的雾浓度倍数（夜里海雾更浓）")]
         public float nightFogMultiplier = 2.4f;
 
+        [Header("碎片的代价")]
+        [Tooltip("每拿到一块碎片，夜晚在现实时间里多长出这个比例（0.35 = 每块碎片夜晚长 35%）")]
+        public float nightLengthPerFragment = 0.35f;
+        [Tooltip("每块碎片让雾整体浓多少（比例）")]
+        public float fogPerFragment = 0.12f;
+        [Tooltip("每块碎片让夜里的雾再额外浓多少（比例）")]
+        public float nightFogPerFragment = 0.25f;
+
+        /// <summary>夜里时间流速的倍数：碎片越多越慢，夜晚在一天里占的比例越大。</summary>
+        public float NightSpeed(int fragments) => 1f / (1f + Mathf.Max(0f, nightLengthPerFragment) * Mathf.Max(0, fragments));
+
+        /// <summary>碎片让雾变浓的倍数；night 是夜色程度 0~1。</summary>
+        public float FragmentFog(int fragments, float night) =>
+            (1f + fogPerFragment * Mathf.Max(0, fragments)) * (1f + night * nightFogPerFragment * Mathf.Max(0, fragments));
+
         [Header("节奏")]
         [Tooltip("拿到第一块碎片之前放慢时间，保证第一章能在白天玩完")]
         public bool slowUntilFirstFragment = true;
