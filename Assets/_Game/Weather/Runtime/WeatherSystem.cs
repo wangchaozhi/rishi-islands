@@ -345,7 +345,7 @@ namespace Rishi.Weather
 
         // ---------------- 地面变湿 ----------------
 
-        TerrainData terrainData;
+        readonly List<TerrainData> terrainDatas = new List<TerrainData>();
         TerrainLayer[] dryLayers, wetLayers;
         readonly List<(Material shared, Material wet, List<Renderer> renderers)> wetMaterials = new List<(Material, Material, List<Renderer>)>();
         float appliedWet = -1f;
@@ -357,18 +357,24 @@ namespace Rishi.Weather
         void PrepareWetness()
         {
             if (dryLayers != null) return;
-            var terrain = Terrain.activeTerrain;
-            if (terrain != null && terrain.terrainData != null)
+            // 每座岛一块地形，用的是同一组地表图层：复制一份，所有用这组图层的地形都换上
+            foreach (var terrain in Terrain.activeTerrains)
             {
-                terrainData = terrain.terrainData;
-                dryLayers = terrainData.terrainLayers;
-                wetLayers = new TerrainLayer[dryLayers.Length];
-                for (int i = 0; i < dryLayers.Length; i++)
+                if (terrain == null || terrain.terrainData == null) continue;
+                var layers = terrain.terrainData.terrainLayers;
+                if (dryLayers == null)
                 {
-                    wetLayers[i] = dryLayers[i] != null ? Instantiate(dryLayers[i]) : null;
-                    if (wetLayers[i] != null) wetLayers[i].hideFlags = HideFlags.DontSave;
+                    dryLayers = layers;
+                    wetLayers = new TerrainLayer[dryLayers.Length];
+                    for (int i = 0; i < dryLayers.Length; i++)
+                    {
+                        wetLayers[i] = dryLayers[i] != null ? Instantiate(dryLayers[i]) : null;
+                        if (wetLayers[i] != null) wetLayers[i].hideFlags = HideFlags.DontSave;
+                    }
                 }
-                terrainData.terrainLayers = wetLayers;
+                else if (!System.Linq.Enumerable.SequenceEqual(layers, dryLayers)) continue;
+                terrainDatas.Add(terrain.terrainData);
+                terrain.terrainData.terrainLayers = wetLayers;
             }
 
             var keys = config.wetMaterialKeywords;
@@ -419,7 +425,7 @@ namespace Rishi.Weather
 
         void RestoreWetness()
         {
-            if (terrainData != null && dryLayers != null) terrainData.terrainLayers = dryLayers;
+            if (dryLayers != null) foreach (var td in terrainDatas) if (td != null) td.terrainLayers = dryLayers;
             if (wetLayers != null) foreach (var l in wetLayers) if (l != null) DestroyImmediate(l);
             foreach (var (shared, wet, renderers) in wetMaterials)
             {
@@ -428,7 +434,7 @@ namespace Rishi.Weather
             }
             wetMaterials.Clear();
             dryLayers = wetLayers = null;
-            terrainData = null;
+            terrainDatas.Clear();
             appliedWet = -1f;
         }
 

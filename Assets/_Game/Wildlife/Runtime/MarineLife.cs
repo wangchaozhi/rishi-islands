@@ -80,7 +80,7 @@ namespace Rishi.Wildlife
 
         void Start()
         {
-            terrain = Terrain.activeTerrain;
+            terrain = Islands.TerrainAt(transform.position);
         }
 
         float SeabedY(Vector3 p) => terrain != null ? terrain.SampleHeight(p) + terrain.transform.position.y : -40f;
@@ -95,6 +95,7 @@ namespace Rishi.Wildlife
             if (checkTimer <= 0f)
             {
                 checkTimer = checkInterval;
+                terrain = Islands.TerrainAt(player.position); // 玩家附近那座岛的海床
                 // 夜里珊瑚鱼躲进礁石，开阔水域的鱼照常
                 var sun = RenderSettings.sun;
                 nightFactor = sun != null && sun.transform.forward.y > 0.05f ? 0f : 1f;

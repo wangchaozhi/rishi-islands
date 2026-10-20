@@ -1,3 +1,4 @@
+using System.Linq;
 using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -50,7 +51,7 @@ namespace Rishi.Builders
             var cam = root.GetComponentInChildren<Camera>();
             var cycle = Object.FindFirstObjectByType<DayNightCycle>();
             var ocean = Object.FindFirstObjectByType<OceanFollow>();
-            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var terrain = IslandBuilder.MainTerrain;
             Vector3 spawn = player.position;
 
             Directory.CreateDirectory("Screenshots/Island");
@@ -200,8 +201,9 @@ namespace Rishi.Builders
             CaptureShade(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureFirstNight(cam, player, root, cycle, ocean);
             CaptureBeasts(cam, player, root, cycle, ocean);
+            CaptureAtoll(cam, player, root, cycle, ocean, spawn);
             // 砍刀能砍开的灌木丛，和营地旁被灌木围住的补给箱
-            var terrainT = Object.FindFirstObjectByType<Terrain>();
+            var terrainT = IslandBuilder.MainTerrain;
             foreach (var (name, dist, height, file) in new[] { ("Thicket", 4.5f, 1.4f, "53_thicket"), ("HiddenCache", 5.5f, 2.6f, "54_hidden_cache") })
             {
                 var go = GameObject.Find(name);
@@ -432,7 +434,7 @@ namespace Rishi.Builders
             var spawner = Object.FindFirstObjectByType<Rishi.Creatures.CreatureDebugSpawner>();
             if (spawner == null || spawner.testCreature == null) return;
             var fwd = Quaternion.Euler(0, spawnYaw - 35f, 0) * Vector3.forward;
-            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var terrain = IslandBuilder.MainTerrain;
             var pos = spawn + fwd * 6f;
             pos.y = terrain.SampleHeight(pos) + terrain.transform.position.y;
             var c = Rishi.Creatures.CreatureDebugSpawner.Spawn(spawner.testCreature, pos, Quaternion.LookRotation(-fwd), cycle);
@@ -448,7 +450,7 @@ namespace Rishi.Builders
             if (spawner == null || spawner.shadeDef == null) return;
             float yaw = spawnYaw + 150f; // 朝丛林
             var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward;
-            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var terrain = IslandBuilder.MainTerrain;
             var pos = spawn + fwd * 7f;
             pos.y = terrain.SampleHeight(pos) + terrain.transform.position.y;
             var shade = Rishi.Creatures.Shade.Spawn(spawner.shadeDef, pos, Quaternion.LookRotation(-fwd), cycle, spawner.bodyMaterial, spawner.smokeMaterial, spawner.eyeMaterial);
@@ -482,7 +484,7 @@ namespace Rishi.Builders
                 var mid = (first + last) * 0.5f;
                 var dir = Vector3.ProjectOnPlane(last - first, Vector3.up).normalized;
                 var side = Vector3.Cross(Vector3.up, dir);
-                var land = Object.FindFirstObjectByType<Terrain>();
+                var land = IslandBuilder.MainTerrain;
                 var eye = mid + side * 4f;
                 if (land.SampleHeight(mid - side * 4f) > land.SampleHeight(eye)) eye = mid - side * 4f; // 站在地势高（离海远）的那一侧
                 eye.y = land.SampleHeight(eye) + land.transform.position.y + 1.05f;
@@ -499,7 +501,7 @@ namespace Rishi.Builders
             {
                 var pp = ev.peter.transform.position;
                 var eye = pp + ev.peter.transform.forward * 12f;
-                eye.y = Object.FindFirstObjectByType<Terrain>().SampleHeight(eye) + 1.05f + Object.FindFirstObjectByType<Terrain>().transform.position.y;
+                eye.y = IslandBuilder.MainTerrain.SampleHeight(eye) + 1.05f + IslandBuilder.MainTerrain.transform.position.y;
                 Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(pp.x - eye.x, pp.z - eye.z) * Mathf.Rad2Deg, -2f, 16.5f, "46_peter_treeline");
             }
             ev.PreviewShow(false);
@@ -508,7 +510,7 @@ namespace Rishi.Builders
         /// <summary>野猪和椰子蟹：白天的样子，和夜里用手电照着的蚀化形态。</summary>
         static void CaptureBeasts(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean)
         {
-            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var terrain = IslandBuilder.MainTerrain;
             var fl = player.GetComponent<Flashlight>();
             var wc = cam.GetComponent<WeaponController>();
             foreach (var (name, dist, file) in new[] { ("Boar", 4.2f, "49_boar"), ("CoconutCrab", 2.6f, "51_coconut_crab") })
@@ -531,6 +533,52 @@ namespace Rishi.Builders
                 if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
                 beast.Preview(false);
             }
+        }
+
+        /// <summary>第二座岛：环礁的鸟瞰、站在沙洲上看礁湖、礁湖内侧的红树林、从主岛出生沙滩远眺。</summary>
+        static void CaptureAtoll(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn)
+        {
+            var spec = AtollBuilder.Default;
+            var atoll = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None).FirstOrDefault(t => t.name == spec.name);
+            if (atoll == null) return;
+            var c = new Vector3(spec.center.x, 0, spec.center.y);
+            float G(Vector3 p) => atoll.SampleHeight(p) + atoll.transform.position.y;
+            float Yaw(Vector3 from, Vector3 to) => Mathf.Atan2(to.x - from.x, to.z - from.z) * Mathf.Rad2Deg;
+            float far = cam.farClipPlane;
+
+            // 鸟瞰：从主岛方向的高处看整个环礁
+            var toMain = (-c).normalized;
+            var eye = c + toMain * (spec.ringRadius + 140f) + Vector3.up * 110f;
+            Shot(cam, player, root, cycle, ocean, eye, Yaw(eye, c), 24f, 11f, "55_atoll_aerial");
+
+            // 站在最高的沙洲上看礁湖
+            Vector3 best = c; float bestH = -99f;
+            for (float a = 0; a < 360f; a += 2f)
+                for (float r = spec.ringRadius * 0.75f; r < spec.ringRadius * 1.2f; r += 3f)
+                {
+                    var p = c + Quaternion.Euler(0, a, 0) * Vector3.forward * r;
+                    float h = G(p);
+                    if (h > bestH) { bestH = h; best = p; }
+                }
+            eye = best; eye.y = bestH + 1.05f;
+            Shot(cam, player, root, cycle, ocean, eye, Yaw(eye, c), 4f, 10f, "56_atoll_lagoon");
+
+            // 红树林：从礁湖中间低空看过去
+            var mDir = new Vector3(Mathf.Cos(AtollBuilder.MangroveAngle(spec)), 0, Mathf.Sin(AtollBuilder.MangroveAngle(spec)));
+            eye = c + mDir * spec.ringRadius * 0.5f + Vector3.up * 7f;
+            Shot(cam, player, root, cycle, ocean, eye, Yaw(eye, c + mDir * spec.ringRadius), 6f, 15.5f, "57_atoll_mangroves");
+
+            // 从主岛朝向环礁那边的岸上高处远眺（岸边是红树林，挡视线）：从环礁往主岛中心走，第一处高出海面 9 米的地方
+            var main = IslandBuilder.MainTerrain;
+            eye = spawn;
+            for (float t = 0f; t < 1f; t += 0.002f)
+            {
+                var p = Vector3.Lerp(c, Vector3.zero, t);
+                float h = main.SampleHeight(p) + main.transform.position.y;
+                if (h > 9f) { eye = p; eye.y = h + 1.05f; break; }
+            }
+            Shot(cam, player, root, cycle, ocean, eye, Yaw(eye, c), 1f, 9f, "58_atoll_from_shore");
+            cam.farClipPlane = far;
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

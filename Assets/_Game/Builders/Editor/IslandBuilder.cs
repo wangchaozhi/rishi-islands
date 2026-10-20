@@ -139,7 +139,9 @@ namespace Rishi.Builders
             Debug.Log($"[Island] 荒岛场景已保存：{ScenePath}" + (player != null ? $"，出生点 {player.transform.position}" : ""));
         }
 
-        static Terrain IslandTerrain => Object.FindFirstObjectByType<Terrain>();
+        /// <summary>主岛的地形（场景里还有环礁等其他岛的地形，不能用 FindFirstObjectByType）。</summary>
+        internal static Terrain MainTerrain => Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None).FirstOrDefault(t => t.name == "Island");
+        static Terrain IslandTerrain => MainTerrain;
         static DayNightCycle Cycle => Object.FindFirstObjectByType<DayNightCycle>();
 
         // ---------- 步骤 1：地形（光照与天空、昼夜、地形、海洋） ----------
@@ -191,7 +193,8 @@ namespace Rishi.Builders
             cycle.timeOfDay = cycle.config.startTime;
 
             CreateTerrain(out var heightTex);
-            CreateOcean(heightTex);
+            var atoll = AtollBuilder.BuildTerrain(AtollBuilder.Default); // 第二座岛：环礁
+            CreateOcean(heightTex, atoll);
         }
 
         // ---------- 步骤 2：剧情（沉船、营地、神殿、拾取物、玩家、剧情系统、开场 CG） ----------
@@ -284,6 +287,7 @@ namespace Rishi.Builders
             MarineBuilder.Build(terrain, FindBeachSpawn(terrain));
 
             ThicketBuilder.Build(terrain, FindBeachSpawn(terrain)); // 砍刀能砍开的灌木丛（在烘焙导航网格前放，野兽会绕开）
+            AtollBuilder.BuildNature(AtollBuilder.Default, terrain); // 环礁：椰子树、红树林、草丛
             BakeNavMesh();
             BeastBuilder.Place(terrain, FindBeachSpawn(terrain), Cycle); // 野猪、椰子蟹（白天 / 夜里蚀化）
 
@@ -430,19 +434,7 @@ namespace Rishi.Builders
             heightTex.Apply();
             SaveAsset(heightTex, $"{Gen}/Terrain/IslandHeight.asset");
 
-            data.terrainLayers = new[]
-            {
-                Layer("damp_beach_sand", 4f, Color.white),                          // 0 湿沙
-                Layer("aerial_beach_01", 7f, Color.white),                          // 1 干沙
-                Pack("Grass_Moss_TerrainLayer") ?? Layer("leafy_grass", 3.5f, Color.white),   // 2 草地（官方样例包的苔藓草地）
-                Layer("forest_leaves_02", 3f, Color.white),      // 3 丛林落叶（潮湿、偏暗）
-                Pack("Rock_TerrainLayer") ?? Layer("rock_face_03", 9f, new Color(0.85f, 0.85f, 0.82f)), // 4 岩壁
-                Pack("Muddy_TerrainLayer") ?? Layer("brown_mud_leaves_01", 3f, Color.white),   // 5 沼泽泥地
-                Pack("Pebbles_A_TerrainLayer") ?? Layer("river_small_rocks", 2.5f, Color.white), // 6 河床卵石
-                Layer("mossy_rock", 5f, Color.white),                              // 7 青苔岩（丛林里的陡坡）
-                Pack("Soil_Rocks_TerrainLayer") ?? Layer("aerial_rocks_02", 10f, Color.white),  // 8 碎石土
-                Pack("Tidal_Pools_TerrainLayer") ?? Layer("coast_sand_rocks_02", 4f, Color.white), // 9 崖下礁石滩（潮池）
-            };
+            data.terrainLayers = TerrainLayers();
             PaintSplat(data);
             EditorUtility.SetDirty(data);
 
@@ -470,6 +462,21 @@ namespace Rishi.Builders
             terrain.materialTemplate = mat;
             return terrain;
         }
+
+        /// <summary>地表图层（顺序和 SurfaceTag.TerrainLayerSurfaces 一致）。所有岛共用这一组图层。</summary>
+        internal static TerrainLayer[] TerrainLayers() => new[]
+        {
+            Layer("damp_beach_sand", 4f, Color.white),                          // 0 湿沙
+            Layer("aerial_beach_01", 7f, Color.white),                          // 1 干沙
+            Pack("Grass_Moss_TerrainLayer") ?? Layer("leafy_grass", 3.5f, Color.white),   // 2 草地（官方样例包的苔藓草地）
+            Layer("forest_leaves_02", 3f, Color.white),      // 3 丛林落叶（潮湿、偏暗）
+            Pack("Rock_TerrainLayer") ?? Layer("rock_face_03", 9f, new Color(0.85f, 0.85f, 0.82f)), // 4 岩壁
+            Pack("Muddy_TerrainLayer") ?? Layer("brown_mud_leaves_01", 3f, Color.white),   // 5 沼泽泥地
+            Pack("Pebbles_A_TerrainLayer") ?? Layer("river_small_rocks", 2.5f, Color.white), // 6 河床卵石
+            Layer("mossy_rock", 5f, Color.white),                              // 7 青苔岩（丛林里的陡坡）
+            Pack("Soil_Rocks_TerrainLayer") ?? Layer("aerial_rocks_02", 10f, Color.white),  // 8 碎石土
+            Pack("Tidal_Pools_TerrainLayer") ?? Layer("coast_sand_rocks_02", 4f, Color.white), // 9 崖下礁石滩（潮池）
+        };
 
         const string SamplePack = "Assets/TerrainSampleAssets";
 
@@ -590,7 +597,7 @@ namespace Rishi.Builders
 
         // ================= 海洋 =================
 
-        static void CreateOcean(Texture2D heightTex)
+        static void CreateOcean(Texture2D heightTex, AtollBuilder.Result atoll)
         {
             var mesh = AssetDatabase.LoadAssetAtPath<Mesh>($"{Gen}/Meshes/OceanGrid.asset");
             if (mesh == null)
@@ -604,6 +611,9 @@ namespace Rishi.Builders
             mat.SetTexture("_IslandHeight", heightTex);
             mat.SetVector("_IslandRect", new Vector4(-Size / 2, -Size / 2, Size, Size));
             mat.SetVector("_IslandHeightRange", new Vector4(MinHeight, HeightRange, 0, 0));
+            mat.SetTexture("_IslandHeight2", atoll.heightTex);
+            mat.SetVector("_IslandRect2", atoll.rect);
+            mat.SetVector("_IslandHeightRange2", atoll.heightRange);
             mat.SetFloat("_NormalStrength", 0.55f);
             mat.SetColor("_DeepColor", new Color(0.03f, 0.24f, 0.32f));
             mat.SetFloat("_ScatterDensity", 0.14f);
@@ -1016,7 +1026,7 @@ namespace Rishi.Builders
             return mat;
         }
 
-        static void SaveAsset(Object obj, string path)
+        internal static void SaveAsset(Object obj, string path)
         {
             AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(obj, path);

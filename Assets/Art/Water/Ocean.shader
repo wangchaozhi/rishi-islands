@@ -36,6 +36,9 @@ Shader "Island/Ocean"
         _IslandHeight ("Island Height (R = terrain height, normalized)", 2D) = "black" {}
         _IslandRect ("Island Rect (minX, minZ, sizeX, sizeZ)", Vector) = (-300, -300, 600, 600)
         _IslandHeightRange ("Height Range (min, size)", Vector) = (-20, 80, 0, 0)
+        _IslandHeight2 ("Second Island Height", 2D) = "black" {}
+        _IslandRect2 ("Second Island Rect", Vector) = (100000, 100000, 1, 1)
+        _IslandHeightRange2 ("Second Island Height Range", Vector) = (-20, 30, 0, 0)
         _ShoreWaveDepth ("Waves Fade Depth", Float) = 7
 
         [Header(Surf  waves rolling onto the beach)]
@@ -78,6 +81,7 @@ Shader "Island/Ocean"
 
             TEXTURE2D(_NormalMap);    SAMPLER(sampler_NormalMap);
             TEXTURE2D(_IslandHeight); SAMPLER(sampler_IslandHeight);
+            TEXTURE2D(_IslandHeight2); SAMPLER(sampler_IslandHeight2);
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _ShallowColor, _DeepColor, _FoamColor;
@@ -91,6 +95,7 @@ Shader "Island/Ocean"
                 float _WaveScale;
                 float4 _IslandHeight_ST;
                 float4 _IslandRect, _IslandHeightRange;
+                float4 _IslandRect2, _IslandHeightRange2;
                 float _ShoreWaveDepth;
                 float _SurfDepth, _SurfPeriod, _SurfSpacing, _SurfFoam, _SurgeHeight;
                 float _CausticStrength, _CausticScale, _CausticDepth;
@@ -129,12 +134,17 @@ Shader "Island/Ocean"
                 return float3(d.x * a * co, a * s, d.y * a * co);
             }
 
+            // 海平面 y=0 下方的水深：主岛和第二座岛（环礁）各有一张高度图，取较浅的那个
             float WaterDepthAt(float2 xz)
             {
+                float depth = 100;
                 float2 uv = (xz - _IslandRect.xy) / _IslandRect.zw;
-                if (any(uv < 0) || any(uv > 1)) return 100;
-                float h = SAMPLE_TEXTURE2D_LOD(_IslandHeight, sampler_IslandHeight, uv, 0).r;
-                return -(_IslandHeightRange.x + h * _IslandHeightRange.y); // 海平面 y=0 下方的水深
+                if (all(uv >= 0) && all(uv <= 1))
+                    depth = -(_IslandHeightRange.x + SAMPLE_TEXTURE2D_LOD(_IslandHeight, sampler_IslandHeight, uv, 0).r * _IslandHeightRange.y);
+                float2 uv2 = (xz - _IslandRect2.xy) / _IslandRect2.zw;
+                if (all(uv2 >= 0) && all(uv2 <= 1))
+                    depth = min(depth, -(_IslandHeightRange2.x + SAMPLE_TEXTURE2D_LOD(_IslandHeight2, sampler_IslandHeight2, uv2, 0).r * _IslandHeightRange2.y));
+                return depth;
             }
 
             // 涌浪相位：一组浪线从 _SurfDepth 深处推向岸边，周期 _SurfPeriod 秒；水深越浅相位越靠后

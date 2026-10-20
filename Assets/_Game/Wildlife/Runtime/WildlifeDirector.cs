@@ -51,13 +51,13 @@ namespace Rishi.Wildlife
         void Start()
         {
             if (config == null) { config = ScriptableObject.CreateInstance<WildlifeConfig>(); config.hideFlags = HideFlags.HideAndDontSave; }
-            terrain = Terrain.activeTerrain;
             if (player == null) player = GameSignals.Player;
             fireflies = CreateFireflies();
         }
 
         void Update()
         {
+            if (player != null && (terrain == null || Time.frameCount % 30 == 0)) terrain = Islands.TerrainAt(player.position); // 玩家在哪座岛就用哪块地形
             if (player == null || terrain == null) return;
             float sun = dayNight != null ? dayNight.SunElevation : 0.5f;
             bool day = sun > config.dayElevation;

@@ -229,8 +229,7 @@ namespace Rishi.Creatures
             if (d.sqrMagnitude < 0.04f) return;
             Face(dest, Time.deltaTime);
             var next = transform.position + d.normalized * speed * Time.deltaTime;
-            var t = Terrain.activeTerrain;
-            if (t != null) next.y = t.SampleHeight(next) + t.transform.position.y;
+            next.y = Islands.GroundY(next, next.y);
             transform.position = next;
         }
 

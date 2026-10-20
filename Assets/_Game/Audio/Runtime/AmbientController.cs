@@ -40,7 +40,6 @@ namespace Rishi.Audio
         void Start()
         {
             Instance = this;
-            terrain = Terrain.activeTerrain;
             foreach (var id in new[] { "amb_ocean", "amb_wind", "amb_jungle_day", "amb_night", "amb_temple", "amb_underwater" })
             {
                 var clip = AudioManager.Instance != null ? AudioManager.Instance.RandomClip(id) : null;
@@ -66,7 +65,7 @@ namespace Rishi.Audio
             float day = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(-0.08f, 0.2f, elev));
             float y = transform.position.y;
 
-            if (terrain != null && Time.frameCount % 15 == 0)
+            if (Time.frameCount % 15 == 0 && (terrain = Islands.TerrainAt(transform.position)) != null)
             {
                 string s = SurfaceTag.TerrainSurface(terrain, transform.position);
                 float targetVeg = s == "grass" || s == "leaves" ? 1f : 0.15f;
