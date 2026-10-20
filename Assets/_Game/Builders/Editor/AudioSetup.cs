@@ -65,6 +65,7 @@ namespace Rishi.Builders
             ("fish_scatter", SoundCategory.Sfx, 0.5f, 1f, 15f),
             ("flashlight_", SoundCategory.Sfx, 0.7f, 1f, 5f),
             ("fire_", SoundCategory.Sfx, 0.85f, 1.5f, 20f),
+            ("creature_", SoundCategory.Sfx, 0.9f, 2f, 40f),
             ("player_", SoundCategory.Voice, 0.9f, 1f, 5f),
             ("breath_", SoundCategory.Voice, 0.8f, 1f, 5f),
             ("battery_", SoundCategory.Sfx, 0.7f, 1f, 5f),

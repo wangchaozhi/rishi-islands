@@ -179,6 +179,48 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 12
+  - id: creature_alert
+    clips:
+    - {fileID: 8300000, guid: dfd0de3c756ef486182185d929a414ca, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: creature_attack
+    clips:
+    - {fileID: 8300000, guid: ac25daeb9dd1a4ce7a1964c32ded024c, type: 3}
+    - {fileID: 8300000, guid: 29de8836456b44f3da5a6ff32f9cba0f, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: creature_death
+    clips:
+    - {fileID: 8300000, guid: 05ab791403024466d93aa28b6bd34550, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: creature_hurt
+    clips:
+    - {fileID: 8300000, guid: cf5a15dce31d94edbaf53f8d2cd4be1a, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: creature_idle
+    clips:
+    - {fileID: 8300000, guid: 65a13beaaf6b549ca8a80bd47f9d36a5, type: 3}
+    - {fileID: 8300000, guid: cb79d3245cf0d46e7aef5fedace7d065, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
   - id: dive_under
     clips:
     - {fileID: 8300000, guid: 8e0b21a6fb62e044dbd5f889285117e7, type: 3}

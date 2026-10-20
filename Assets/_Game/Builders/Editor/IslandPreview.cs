@@ -185,6 +185,7 @@ namespace Rishi.Builders
             CaptureWeather(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureFlashlight(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureCampfires(cam, player, root, cycle, ocean);
+            CaptureCreature(cam, player, root, cycle, ocean, spawn, spawnYaw);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
@@ -391,6 +392,21 @@ namespace Rishi.Builders
                 Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(p.x - eye.x, p.z - eye.z) * Mathf.Rad2Deg, 14f, time, file);
                 fire.PreviewLit(false);
             }
+        }
+
+        /// <summary>生物框架：测试生物（F10 生成的那种占位外观）站在沙滩上，黄昏和夜里各一张。</summary>
+        static void CaptureCreature(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn, float spawnYaw)
+        {
+            var spawner = Object.FindFirstObjectByType<Rishi.Creatures.CreatureDebugSpawner>();
+            if (spawner == null || spawner.testCreature == null) return;
+            var fwd = Quaternion.Euler(0, spawnYaw - 35f, 0) * Vector3.forward;
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var pos = spawn + fwd * 6f;
+            pos.y = terrain.SampleHeight(pos) + terrain.transform.position.y;
+            var c = Rishi.Creatures.CreatureDebugSpawner.Spawn(spawner.testCreature, pos, Quaternion.LookRotation(-fwd), cycle);
+            Shot(cam, player, root, cycle, ocean, spawn, spawnYaw - 35f, 4f, 18.4f, "41_creature_dusk");
+            Shot(cam, player, root, cycle, ocean, spawn, spawnYaw - 35f, 4f, 22.5f, "42_creature_night");
+            Object.DestroyImmediate(c.gameObject);
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

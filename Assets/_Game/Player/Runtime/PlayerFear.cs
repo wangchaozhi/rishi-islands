@@ -37,6 +37,9 @@ namespace Rishi.Player
         AudioSource heartbeat, breath;
         float shadeTimer, shade = 1f, seed;
 
+        void OnEnable() => GameSignals.FearAdded += Add;
+        void OnDisable() => GameSignals.FearAdded -= Add;
+
         void Start()
         {
             seed = Random.value * 100f;

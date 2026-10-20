@@ -1,0 +1,19 @@
+{
+    "name": "Rishi.Creatures",
+    "rootNamespace": "Rishi.Creatures",
+    "references": [
+        "Rishi.Core",
+        "Rishi.World",
+        "Rishi.Audio",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

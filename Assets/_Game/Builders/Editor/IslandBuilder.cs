@@ -233,6 +233,9 @@ namespace Rishi.Builders
             cam.GetComponent<UnderwaterFX>().dayNight = cycle;
             GameplaySetup.SetupFlashlight(player, cam, FPSSceneBuilder.WeaponLayer); // 手电筒在营地捡到后才能用
             player.AddComponent<PlayerHealth>();
+            var debugSpawner = new GameObject("CreatureDebug").AddComponent<Rishi.Creatures.CreatureDebugSpawner>(); // F10 生成测试生物
+            debugSpawner.testCreature = ConfigAssets.TestCreature;
+            debugSpawner.dayNight = cycle;
             var fear = player.AddComponent<PlayerFear>();
             fear.dayNight = cycle;
             fear.shakeTarget = cam.transform;
@@ -275,11 +278,29 @@ namespace Rishi.Builders
             // 海底世界：沙波、礁盘、珊瑚、海草、沉船残骸
             MarineBuilder.Build(terrain, FindBeachSpawn(terrain));
 
+            BakeNavMesh();
+
             var wildlife = new GameObject("Wildlife").AddComponent<WildlifeDirector>(); // 运行时通过 GameSignals 找玩家
             wildlife.config = ConfigAssets.Wildlife;
             wildlife.dayNight = Cycle;
             wildlife.fireflyMaterial = FireflyMaterial();
             if (BirdsSetup.Available) BirdsSetup.Build(terrain, Cycle); // Living Birds（Asset Store）
+        }
+
+        /// <summary>烘焙整座岛的导航网格（生物寻路用），按物理碰撞体收集几何，存成资产。</summary>
+        static void BakeNavMesh()
+        {
+            var surface = new GameObject("NavMesh").AddComponent<Unity.AI.Navigation.NavMeshSurface>();
+            surface.collectObjects = Unity.AI.Navigation.CollectObjects.All;
+            surface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
+            surface.layerMask = ~(1 << FPSSceneBuilder.WeaponLayer);
+            surface.BuildNavMesh();
+            const string path = Gen + "/Terrain/IslandNavMesh.asset";
+            AssetDatabase.DeleteAsset(path);
+            AssetDatabase.CreateAsset(surface.navMeshData, path);
+            EditorUtility.SetDirty(surface);
+            var tri = UnityEngine.AI.NavMesh.CalculateTriangulation();
+            Debug.Log($"[Island] 导航网格：{tri.vertices.Length} 个顶点");
         }
 
         /// <summary>植物、石头要避开的空地：出生点、沉船、营地、神殿。从场景里的剧情物体读位置，单独重跑植被时也能用。</summary>

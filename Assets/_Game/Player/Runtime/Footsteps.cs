@@ -57,6 +57,7 @@ namespace Rishi.Player
             CurrentSurface = DetectSurface();
             Vector3 feet = transform.position + Vector3.down * (cc.height / 2f);
             AudioManager.Play("step_" + CurrentSurface, feet, volume);
+            GameSignals.MakeNoise(feet, player != null && player.IsSprinting ? 12f : 4f); // 冲刺的脚步声更容易被听见
         }
 
         string DetectSurface()

@@ -31,6 +31,15 @@ namespace Rishi.Builders
             return c;
         });
 
+        /// <summary>测试生物（F10 生成），用来试生物框架。</summary>
+        public static Rishi.Creatures.CreatureDef TestCreature => LoadOrCreate("Creature_Test", () =>
+        {
+            var c = ScriptableObject.CreateInstance<Rishi.Creatures.CreatureDef>();
+            c.displayName = "测试生物";
+            c.lightReaction = Rishi.Creatures.LightReaction.Flinch;
+            return c;
+        });
+
         public static WeatherProfile WeatherProfileAsset(string id) => LoadOrCreate("Weather_" + id, () => WeatherProfile.CreateDefault(id));
 
         public static T LoadOrCreate<T>(string name, Func<T> create = null) where T : ScriptableObject

@@ -238,6 +238,7 @@ namespace Rishi.Weapons
         {
             Current.loaded--;
             AudioManager.Play2D(def.fireSound);
+            GameSignals.MakeNoise(cam.transform.position, 70f); // 枪声传得很远
             Kick(def);
             SpreadNow += 1.2f;
 
@@ -277,6 +278,7 @@ namespace Rishi.Weapons
         {
             weaponFeel?.Swing();
             AudioManager.Play2D(def.fireSound);
+            GameSignals.MakeNoise(cam.transform.position, 10f); // 挥刀
             yield return new WaitForSeconds(def.meleeHitDelay);
             var ray = new Ray(cam.transform.position, cam.transform.forward);
             if (Physics.SphereCast(ray, def.meleeRadius, out var hit, def.range, hitMask, QueryTriggerInteraction.Ignore))
@@ -293,6 +295,7 @@ namespace Rishi.Weapons
         {
             Current.loaded--;
             AudioManager.Play2D(def.fireSound);
+            GameSignals.MakeNoise(cam.transform.position, 18f); // 鱼枪
             Kick(def);
             if (Current.viewModel != null)
             {
