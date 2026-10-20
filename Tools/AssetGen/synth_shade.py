@@ -85,3 +85,9 @@ f = 800 * np.exp(-t * 1.2) + 60
 death = (2 * ((np.cumsum(f / SR)) % 1) - 1) * np.exp(-t * 2) * 0.5 + formant_noise(n, [(700, 500, 1)]) * np.exp(-((t - 1.2) ** 2) / 0.4) * 0.8
 save("shade_death", death, 0.8)
 print("shade_whisper shade_scream shade_alert shade_bite_1..2 shade_hurt shade_death")
+
+# 彼得消失：一口倒吸的低语，被风一下子卷走（倒放的气声）
+n = int(SR * 1.4); t = np.arange(n) / SR
+gust = formant_noise(n, [(600, 300, 1), (1800, 500, .6), (4200, 900, .3)]) * (t / t[-1]) ** 2.5
+save("peter_vanish", gust[::-1][::-1] * np.minimum(1, (t[-1] - t) / 0.05), 0.75)
+print("peter_vanish")

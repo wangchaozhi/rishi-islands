@@ -220,6 +220,9 @@ namespace Rishi.Builders
             // 武器与道具拾取物（放在沉船、营地旁）
             GameplaySetup.PlacePickups(terrain, spawnPoint);
 
+            // 第一夜：湿脚印、林边的彼得、沉船里的敲击声（拿到第一块碎片后触发）
+            FirstNightBuilder.Build(terrain, spawnPoint, cycle);
+
             // 玩家：出生时面朝沉船
             var pistolMat = FPSSceneBuilder.Pbr("Pistol", "Models/service_pistol", 1f);
             FPSSceneBuilder.BuildPlayer(pistolMat);

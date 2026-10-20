@@ -458,6 +458,14 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 10
+  - id: peter_vanish
+    clips:
+    - {fileID: 8300000, guid: b3d27f25d6cd24bacb910f49a769be41, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 3
+    maxDistance: 40
   - id: player_death
     clips:
     - {fileID: 8300000, guid: 4fc733fc07e3047f78c4b228f66928f5, type: 3}

@@ -67,6 +67,9 @@ namespace Rishi.Core
         /// <summary>恐惧值（0~1），PlayerFear 写入：黑暗里上升，光里下降。</summary>
         public static float Fear { get; set; }
 
+        /// <summary>脚本事件进行中（第一夜等），随机刷怪暂停，让事件按剧本走。</summary>
+        public static bool ScriptedEventActive { get; set; }
+
         // ---------- 噪声与恐惧 ----------
         /// <summary>发出声响（开枪、冲刺脚步……）：位置和能被听见的半径（米）。生物据此来调查。</summary>
         public static event Action<Vector3, float> NoiseMade;
@@ -129,6 +132,7 @@ namespace Rishi.Core
             InSafeZone = false;
             Fear = 0f;
             NoiseMade = null;
+            ScriptedEventActive = false;
             FearAdded = null;
             FlashlightOn = false;
             FlashlightCharge = -1f;

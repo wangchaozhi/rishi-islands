@@ -187,6 +187,7 @@ namespace Rishi.Builders
             CaptureCampfires(cam, player, root, cycle, ocean);
             CaptureCreature(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureShade(cam, player, root, cycle, ocean, spawn, spawnYaw);
+            CaptureFirstNight(cam, player, root, cycle, ocean);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
@@ -434,6 +435,44 @@ namespace Rishi.Builders
                 if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
             }
             Object.DestroyImmediate(shade.gameObject);
+        }
+
+        /// <summary>第一夜：手电照着沙滩上通向沉船的湿脚印；黄昏余光里林边站着的彼得。</summary>
+        static void CaptureFirstNight(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean)
+        {
+            var ev = Object.FindFirstObjectByType<FirstNightEvent>(FindObjectsInactive.Include);
+            if (ev == null || ev.footprints == null) return;
+            ev.PreviewShow(true);
+            var prints = ev.footprints.transform;
+            if (prints.childCount > 2)
+            {
+                // 站在脚印旁边的干沙上，侧着看这一串从海里走上来的脚印
+                var first = prints.GetChild(0).position;
+                var last = prints.GetChild(prints.childCount - 1).position;
+                var mid = (first + last) * 0.5f;
+                var dir = Vector3.ProjectOnPlane(last - first, Vector3.up).normalized;
+                var side = Vector3.Cross(Vector3.up, dir);
+                var land = Object.FindFirstObjectByType<Terrain>();
+                var eye = mid + side * 4f;
+                if (land.SampleHeight(mid - side * 4f) > land.SampleHeight(eye)) eye = mid - side * 4f; // 站在地势高（离海远）的那一侧
+                eye.y = land.SampleHeight(eye) + land.transform.position.y + 1.05f;
+                var back = (eye - mid).normalized;
+                var fl = player.GetComponent<Flashlight>();
+                var wc = cam.GetComponent<WeaponController>();
+                if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(false);
+                fl?.PreviewOn(true);
+                Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(-back.x, -back.z) * Mathf.Rad2Deg, 30f, 21.5f, "45_wet_footprints");
+                fl?.PreviewOn(false);
+                if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
+            }
+            if (ev.peter != null)
+            {
+                var pp = ev.peter.transform.position;
+                var eye = pp + ev.peter.transform.forward * 12f;
+                eye.y = Object.FindFirstObjectByType<Terrain>().SampleHeight(eye) + 1.05f + Object.FindFirstObjectByType<Terrain>().transform.position.y;
+                Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(pp.x - eye.x, pp.z - eye.z) * Mathf.Rad2Deg, -2f, 16.5f, "46_peter_treeline");
+            }
+            ev.PreviewShow(false);
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

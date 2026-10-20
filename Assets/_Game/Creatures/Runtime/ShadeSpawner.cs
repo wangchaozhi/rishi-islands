@@ -38,7 +38,7 @@ namespace Rishi.Creatures
 
             UpdateThreat();
 
-            if (!Night || GameSignals.CutsceneActive || GameSignals.Player == null) return;
+            if (!Night || GameSignals.CutsceneActive || GameSignals.ScriptedEventActive || GameSignals.Player == null) return;
             timer -= Time.deltaTime;
             if (timer > 0f) return;
             timer = Random.Range(spawnInterval.x, spawnInterval.y);
