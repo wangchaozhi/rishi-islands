@@ -283,6 +283,15 @@ namespace Rishi.Weapons
             var ray = new Ray(cam.transform.position, cam.transform.forward);
             if (Physics.SphereCast(ray, def.meleeRadius, out var hit, def.range, hitMask, QueryTriggerInteraction.Ignore))
             {
+                // 灌木丛：砍开它（只有近战武器能砍）
+                var bush = hit.collider.GetComponentInParent<IChoppable>();
+                if (bush != null && !bush.Cut)
+                {
+                    bool down = bush.Chop(hit.point, ray.direction);
+                    AudioManager.Play(down ? "bush_fall" : "bush_chop", hit.point, 1f);
+                    player?.AddRecoil(0.8f, UnityEngine.Random.Range(-0.6f, 0.6f));
+                    yield break;
+                }
                 var target = ApplyHit(hit, def.damage, ray.direction * def.impactForce);
                 string surface = target != null ? "flesh" : SurfaceTag.At(hit);
                 AudioManager.Play(surface == "flesh" ? "machete_hit_flesh" : surface == "wood" || surface == "leaves" || surface == "grass" ? "machete_hit_wood" : "machete_hit_stone", hit.point, 0.9f);

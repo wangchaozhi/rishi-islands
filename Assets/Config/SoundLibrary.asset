@@ -202,6 +202,24 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 8
+  - id: bush_chop
+    clips:
+    - {fileID: 8300000, guid: 92d94d5b7ec2f49738903cb68645069e, type: 3}
+    - {fileID: 8300000, guid: 16acdcacaa4b14670b511b83d43b8e4a, type: 3}
+    - {fileID: 8300000, guid: a399c80f36e354898a03ac1763380547, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
+  - id: bush_fall
+    clips:
+    - {fileID: 8300000, guid: f20bfda5fb10840089cc1e55a8851e0f, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
   - id: ccrab_alert
     clips:
     - {fileID: 8300000, guid: 725c48a82395b4c30b6d0bff508a9448, type: 3}

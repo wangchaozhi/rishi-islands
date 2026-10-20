@@ -48,3 +48,17 @@ bat = place(bat, slide + rng.normal(size=len(slide)) * 0.15 * np.hanning(len(sli
 bat = place(bat, click(0.06, 2800, 160), 0.55)
 save("battery_insert", bat, 0.6)
 print("flashlight_click.wav battery_insert.wav")
+
+# 砍灌木：刀砍进枝叶的「唰」+ 树枝折断的脆响（3 个变体）；砍倒：一阵哗啦的枝叶倒地声
+for v in range(3):
+    n = int(SR * 0.45); t = np.arange(n) / SR
+    rustle = np.fft.irfft(np.fft.rfft(rng.normal(size=n)) * (1 / (1 + (1500 / np.maximum(np.fft.rfftfreq(n, 1 / SR), 1)) ** 2)), n)
+    rustle *= np.minimum(1, t / 0.01) * np.exp(-t * (7 + v))
+    snap = np.zeros(n); i = int(SR * (0.03 + v * 0.015)); L = int(SR * 0.02)
+    snap[i:i + L] = rng.normal(size=L) * np.exp(-np.arange(L) / SR * 300) * 1.5
+    save(f"bush_chop_{v + 1}", rustle / np.abs(rustle).max() + snap, 0.75)
+n = int(SR * 1.6); t = np.arange(n) / SR
+fall = np.fft.irfft(np.fft.rfft(rng.normal(size=n)) * (1 / (1 + (900 / np.maximum(np.fft.rfftfreq(n, 1 / SR), 1)) ** 2)), n)
+fall *= np.minimum(1, t / 0.08) * np.exp(-t * 2.2)
+save("bush_fall", fall, 0.8)
+print("bush_chop_1..3 bush_fall")

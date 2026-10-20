@@ -283,6 +283,7 @@ namespace Rishi.Builders
             // 海底世界：沙波、礁盘、珊瑚、海草、沉船残骸
             MarineBuilder.Build(terrain, FindBeachSpawn(terrain));
 
+            ThicketBuilder.Build(terrain, FindBeachSpawn(terrain)); // 砍刀能砍开的灌木丛（在烘焙导航网格前放，野兽会绕开）
             BakeNavMesh();
             BeastBuilder.Place(terrain, FindBeachSpawn(terrain), Cycle); // 野猪、椰子蟹（白天 / 夜里蚀化）
 

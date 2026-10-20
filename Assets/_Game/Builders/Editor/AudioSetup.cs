@@ -70,6 +70,7 @@ namespace Rishi.Builders
             ("shade_", SoundCategory.Sfx, 0.9f, 2.5f, 40f),
             ("peter_", SoundCategory.Sfx, 1f, 3f, 40f),
             ("boar_", SoundCategory.Sfx, 0.9f, 2f, 40f),
+            ("bush_", SoundCategory.Sfx, 0.9f, 1.5f, 25f),
             ("ccrab_", SoundCategory.Sfx, 0.85f, 1.5f, 25f),
             ("player_", SoundCategory.Voice, 0.9f, 1f, 5f),
             ("breath_", SoundCategory.Voice, 0.8f, 1f, 5f),

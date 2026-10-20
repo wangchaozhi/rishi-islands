@@ -200,6 +200,17 @@ namespace Rishi.Builders
             CaptureShade(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureFirstNight(cam, player, root, cycle, ocean);
             CaptureBeasts(cam, player, root, cycle, ocean);
+            // 砍刀能砍开的灌木丛，和营地旁被灌木围住的补给箱
+            var terrainT = Object.FindFirstObjectByType<Terrain>();
+            foreach (var (name, dist, height, file) in new[] { ("Thicket", 4.5f, 1.4f, "53_thicket"), ("HiddenCache", 5.5f, 2.6f, "54_hidden_cache") })
+            {
+                var go = GameObject.Find(name);
+                if (go == null) continue;
+                var p = go.transform.position;
+                var eye = p + new Vector3(dist * 0.8f, 0, -dist * 0.6f);
+                eye.y = terrainT.SampleHeight(eye) + terrainT.transform.position.y + height;
+                Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(p.x - eye.x, p.z - eye.z) * Mathf.Rad2Deg, Mathf.Atan2(eye.y + 0.7f - (p.y + 0.8f), dist) * Mathf.Rad2Deg, 11f, file);
+            }
             // 碎片的代价：同一个黄昏视角，0 块碎片和 4 块碎片时的雾
             foreach (var (n, file) in new[] { (0, "47_dusk_fragments0"), (4, "48_dusk_fragments4") })
             {
