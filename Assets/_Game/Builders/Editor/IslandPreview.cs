@@ -40,7 +40,11 @@ namespace Rishi.Builders
             CutscenePreview.Capture(IslandBuilder.ScenePath, "CG03_StoneDoor", new[] { 1f, 3.5f, 6f });
             CutscenePreview.Capture(IslandBuilder.ScenePath, "CG04_FirstHeart", new[] { 1f, 3f });
             CutscenePreview.Capture(IslandBuilder.ScenePath, "CG05_Nightfall", new[] { 1.5f, 6f, 9.5f });
+            CaptureSetSail();
         }
+
+        /// <summary>只截 CG06 启航。</summary>
+        public static void CaptureSetSail() => CutscenePreview.Capture(IslandBuilder.ScenePath, "CG06_SetSail", new[] { 1.5f, 5.5f, 9f });
 
         [MenuItem("Tools/Island/渲染预览截图")]
         public static void Capture()
@@ -202,6 +206,7 @@ namespace Rishi.Builders
             CaptureFirstNight(cam, player, root, cycle, ocean);
             CaptureBeasts(cam, player, root, cycle, ocean);
             CaptureAtoll(cam, player, root, cycle, ocean, spawn);
+            CaptureBoat(cam, player, root, cycle, ocean);
             // 砍刀能砍开的灌木丛，和营地旁被灌木围住的补给箱
             var terrainT = IslandBuilder.MainTerrain;
             foreach (var (name, dist, height, file) in new[] { ("Thicket", 4.5f, 1.4f, "53_thicket"), ("HiddenCache", 5.5f, 2.6f, "54_hidden_cache") })
@@ -533,6 +538,35 @@ namespace Rishi.Builders
                 if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
                 beast.Preview(false);
             }
+        }
+
+        /// <summary>小艇：搁在沙滩上船底破着、修好之后，和开到海上坐在船里看向环礁。</summary>
+        static void CaptureBoat(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean)
+        {
+            var boat = Object.FindFirstObjectByType<Rishi.Vehicles.Boat>();
+            if (boat == null) return;
+            var b = boat.transform;
+            var main = IslandBuilder.MainTerrain;
+            var target = b.position + Vector3.up * 0.4f;
+            var eye = b.position - b.forward * 3.2f + b.right * 3.4f;
+            eye.y = main.SampleHeight(eye) + main.transform.position.y + 1.05f;
+            float yaw = Mathf.Atan2(target.x - eye.x, target.z - eye.z) * Mathf.Rad2Deg;
+            float pitch = Mathf.Atan2(eye.y + 0.7f - target.y, Vector3.Distance(new Vector3(eye.x, 0, eye.z), new Vector3(target.x, 0, target.z))) * Mathf.Rad2Deg;
+            boat.SetRepaired(false);
+            Shot(cam, player, root, cycle, ocean, eye, yaw, pitch, 9.5f, "59_dinghy_broken");
+            boat.SetRepaired(true);
+            Shot(cam, player, root, cycle, ocean, eye, yaw, pitch, 9.5f, "60_dinghy_repaired");
+
+            // 开到海上：船浮在水面，坐在后座板上看向东北的环礁
+            var pose = (b.position, b.rotation);
+            var atoll = new Vector3(AtollBuilder.Default.center.x, 0, AtollBuilder.Default.center.y);
+            var sea = new Vector3(b.position.x, -boat.draft, b.position.z) + Vector3.ProjectOnPlane(b.forward, Vector3.up).normalized * 45f; // 船头朝海，先划出去
+            var dir = atoll - sea; dir.y = 0; dir.Normalize();
+            b.SetPositionAndRotation(sea, Quaternion.LookRotation(dir));
+            var seat = boat.seat.position;
+            Shot(cam, player, root, cycle, ocean, seat, b.eulerAngles.y, 4f, 10f, "61_dinghy_at_sea");
+            b.SetPositionAndRotation(pose.Item1, pose.Item2);
+            boat.SetRepaired(false);
         }
 
         /// <summary>第二座岛：环礁的鸟瞰、站在沙洲上看礁湖、礁湖内侧的红树林、从主岛出生沙滩远眺。</summary>

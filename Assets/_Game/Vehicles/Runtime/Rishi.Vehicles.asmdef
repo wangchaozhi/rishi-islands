@@ -1,0 +1,20 @@
+{
+    "name": "Rishi.Vehicles",
+    "rootNamespace": "Rishi.Vehicles",
+    "references": [
+        "Rishi.Audio",
+        "Rishi.Core",
+        "Rishi.Inventory",
+        "Rishi.Player",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

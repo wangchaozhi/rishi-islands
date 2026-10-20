@@ -112,7 +112,7 @@ namespace Rishi.Story
             GameSignals.ScriptedEventActive = false;
             if (amb != null) StartCoroutine(Fade(amb, amb.silence, 0f, 10f));
             while (dayNight != null && dayNight.SunElevation < 0.05f) yield return null;
-            GameState.Instance?.SetObjective(8, "天亮了。线索：「海水退去之处」。修好沉船的小艇，前往下一座岛（开发中）");
+            GameState.Instance?.SetObjective(8, "天亮了。线索：「海水退去之处」。修好沉船旁的小艇（木板 ×3、绳子 ×1），前往东北方海上的环礁");
             if (footprints != null) footprints.SetActive(false);
             if (peter != null) peter.gameObject.SetActive(false);
             Current = Stage.Done;

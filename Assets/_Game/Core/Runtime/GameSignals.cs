@@ -67,6 +67,9 @@ namespace Rishi.Core
         /// <summary>恐惧值（0~1），PlayerFear 写入：黑暗里上升，光里下降。</summary>
         public static float Fear { get; set; }
 
+        /// <summary>玩家坐在载具（小艇）上：E 键留给载具下船，互动射线暂停。</summary>
+        public static bool InVehicle { get; set; }
+
         /// <summary>脚本事件进行中（第一夜等），随机刷怪暂停，让事件按剧本走。</summary>
         public static bool ScriptedEventActive { get; set; }
 
@@ -133,6 +136,7 @@ namespace Rishi.Core
             Fear = 0f;
             NoiseMade = null;
             ScriptedEventActive = false;
+            InVehicle = false;
             FearAdded = null;
             FlashlightOn = false;
             FlashlightCharge = -1f;

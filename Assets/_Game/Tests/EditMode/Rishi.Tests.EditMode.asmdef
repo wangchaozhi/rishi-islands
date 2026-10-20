@@ -11,7 +11,8 @@
         "Rishi.Weather",
         "Rishi.Inventory",
         "Rishi.Player",
-        "Rishi.Creatures"
+        "Rishi.Creatures",
+        "Rishi.Vehicles"
     ],
     "includePlatforms": [
         "Editor"

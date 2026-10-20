@@ -14,7 +14,7 @@ namespace Rishi.Core
         void Update()
         {
             Current = null;
-            if (GameSignals.GameplayBlocked) return;
+            if (GameSignals.GameplayBlocked || GameSignals.InVehicle) return;
 
             var ray = new Ray(transform.position, transform.forward);
             if (Physics.Raycast(ray, out var hit, range, mask, QueryTriggerInteraction.Collide))

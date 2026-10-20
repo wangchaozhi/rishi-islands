@@ -53,6 +53,10 @@ namespace Rishi.Builders
                 "从椰子树下捡的青椰子，用砍刀劈开就能喝。");
             DefItem("flashlight", "手电筒", ItemCategory.Material, 1, "灯", new Color(0.55f, 0.42f, 0.22f),
                 "父亲的老式黄铜手电筒，开关有点涩。按 F 开关，亮着会耗电。");
+            DefItem("plank", "木板", ItemCategory.Material, 6, "板", new Color(0.5f, 0.36f, 0.2f),
+                "从沉船上散落下来的船板，泡过海水但还结实。修补小艇要 3 块。");
+            DefItem("rope", "绳子", ItemCategory.Material, 3, "绳", new Color(0.62f, 0.52f, 0.34f),
+                "一捆麻绳，父亲营地里的。修补小艇时用来勒紧补丁。");
             var battery = DefItem("battery", "电池", ItemCategory.Consumable, 8, "池", new Color(0.3f, 0.36f, 0.3f),
                 "一节 1 号电池。手电筒没电时会自动换上，也可以在这里直接装进去。");
             if (!battery.usable)
@@ -358,7 +362,7 @@ namespace Rishi.Builders
 
         // ================= 场景里的拾取物 =================
 
-        static void MakePickup(GameObject go, ItemDef item, int count, string verb, Vector3 colliderSize)
+        internal static void MakePickup(GameObject go, ItemDef item, int count, string verb, Vector3 colliderSize)
         {
             var box = go.AddComponent<BoxCollider>();
             box.size = colliderSize;

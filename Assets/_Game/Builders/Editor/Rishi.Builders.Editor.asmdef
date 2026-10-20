@@ -21,7 +21,8 @@
         "Unity.RenderPipelines.Universal.Runtime",
         "Rishi.Inventory",
         "Rishi.Weather",
-        "Rishi.Creatures"
+        "Rishi.Creatures",
+        "Rishi.Vehicles"
     ],
     "includePlatforms": [
         "Editor"

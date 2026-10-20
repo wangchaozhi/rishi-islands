@@ -184,6 +184,59 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 2
     maxDistance: 40
+  - id: boat_motor
+    clips:
+    - {fileID: 8300000, guid: f2312d3ec02ca4f03b07e647332e4de9, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boat_motor_start
+    clips:
+    - {fileID: 8300000, guid: a26f5d31e05f84037b425a8d24913c92, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boat_oar
+    clips:
+    - {fileID: 8300000, guid: 554e521c1ecee47dab3606aebec03076, type: 3}
+    - {fileID: 8300000, guid: 9a41937d640954f369dfd86e5f630cd5, type: 3}
+    - {fileID: 8300000, guid: eb79856f18f58418da7118ad33cec0e4, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boat_scrape
+    clips:
+    - {fileID: 8300000, guid: c07e2523b1eb242b3b6cba142f59b92c, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boat_slap
+    clips:
+    - {fileID: 8300000, guid: e788c99ec91ed42ab883650033efdc56, type: 3}
+    - {fileID: 8300000, guid: e7d0d323a8cf9470d9360caaa00910f9, type: 3}
+    - {fileID: 8300000, guid: f291b1861911b4bb8b9767c1be6efddd, type: 3}
+    - {fileID: 8300000, guid: 466468b4c057547e2878c87a5ab38c08, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boat_water
+    clips:
+    - {fileID: 8300000, guid: 4529c6fd22a7a4d48b950ec0a209ce61, type: 3}
+    category: 1
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
   - id: breath_hurt
     clips:
     - {fileID: 8300000, guid: d687b02d141144098902ddebf0f32b8a, type: 3}

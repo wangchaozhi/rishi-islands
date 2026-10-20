@@ -80,6 +80,12 @@ namespace Rishi.Player
         /// <summary>开始 / 结束游泳。</summary>
         public event Action<bool> SwimStateChanged;
 
+        /// <summary>坐在载具的座位上时不为空：只能转头看，位置跟着座位走。</summary>
+        public Transform Seat { get; private set; }
+        /// <summary>离开座位时触发（自己下船，或者死亡复活等被瞬移）。</summary>
+        public event Action LeftSeat;
+        Transform parentBeforeSeat;
+
         float FeetY => transform.position.y + controller.center.y - controller.height / 2f;
         float EyeY => cameraRoot.position.y;
 
@@ -110,6 +116,7 @@ namespace Rishi.Player
 
             LookDelta = IsCursorLocked && !blocked ? mouse.delta.ReadValue() * mouseSensitivity : Vector2.zero;
             Look();
+            if (Seat != null) { UpdateCameraOffset(); return; } // 坐在船上：只转头
             UpdateWaterState();
             if (IsSwimming) Swim(keyboard, blocked);
             else Move(keyboard, blocked);
@@ -123,9 +130,36 @@ namespace Rishi.Player
             recoilTarget += new Vector2(up, side);
         }
 
-        /// <summary>瞬移（昏迷醒来、剧情传送），清空速度。</summary>
+        /// <summary>坐到载具的座位上（跟着座位移动，关掉角色碰撞）。</summary>
+        public void SitOn(Transform seat, float localYaw = 0f)
+        {
+            if (Seat == null) parentBeforeSeat = transform.parent;
+            controller.enabled = false;
+            transform.SetParent(seat, false);
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.Euler(0, localYaw, 0);
+            Seat = seat;
+            velocity = planarVelocity = swimVelocity = Vector3.zero;
+            SetSwimming(false);
+            IsHeadUnderwater = false;
+            PublishWaterSignals();
+            GameSignals.InVehicle = true;
+        }
+
+        /// <summary>离开座位（没坐着时什么也不做）。之后应该马上 Teleport 到下船的位置。</summary>
+        void LeaveSeat()
+        {
+            if (Seat == null) return;
+            Seat = null;
+            transform.SetParent(parentBeforeSeat, true);
+            GameSignals.InVehicle = false;
+            LeftSeat?.Invoke();
+        }
+
+        /// <summary>瞬移（昏迷醒来、剧情传送、下船），清空速度。坐在载具上时先离开座位。</summary>
         public void Teleport(Vector3 position, float yaw)
         {
+            LeaveSeat();
             controller.enabled = false;
             transform.SetPositionAndRotation(position, Quaternion.Euler(0, yaw, 0));
             controller.enabled = true;
