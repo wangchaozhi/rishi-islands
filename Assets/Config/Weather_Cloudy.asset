@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40578c427dc414faba0cc9c2611af63b, type: 3}
+  m_Name: Weather_Cloudy
+  m_EditorClassIdentifier: Rishi.World::Rishi.World.WeatherProfile
+  displayName: "\u591A\u4E91"
+  cloudCover: 0.62
+  overcast: 0
+  sunIntensity: 0.85
+  ambientIntensity: 1
+  volumetric: 1.1
+  fogMultiplier: 1
+  fogTint: 0
+  windStrength: 1.2
+  windBoost: 0
+  waveScale: 1
+  rain: 0
+  birdDamp: 0
+  lightning: 0
+  flashInterval: {x: 3.5, y: 8}
+  forceTimeOfDay: -1
+  fogDensity: 0.0015
+  fogColor: {r: 0.44, g: 0.56, b: 0.7, a: 1}

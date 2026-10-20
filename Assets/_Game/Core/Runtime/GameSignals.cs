@@ -57,6 +57,12 @@ namespace Rishi.Core
         /// <summary>全屏黑场（0~1），昏迷、传送时用。</summary>
         public static float ScreenFade { get; set; }
 
+        // ---------- 天气 ----------
+        /// <summary>当前雨量（0~1），天气系统写入；以后的怪物据此在雨夜更活跃。</summary>
+        public static float Rain { get; set; }
+        /// <summary>当前天气的名字（晴、小雨……），天气系统写入。</summary>
+        public static string Weather { get; set; } = "";
+
         public static void SetFragments(int count)
         {
             if (count == Fragments) return;
@@ -90,6 +96,8 @@ namespace Rishi.Core
             CameraDepth = 0f;
             Oxygen = 1f;
             ScreenFade = 0f;
+            Rain = 0f;
+            Weather = "";
         }
     }
 }

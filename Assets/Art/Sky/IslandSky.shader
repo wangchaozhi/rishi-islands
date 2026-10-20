@@ -41,7 +41,9 @@ Shader "Island/Sky"
             float _SunSize, _SunIntensity, _MoonSize, _CloudCoverage, _CloudSoftness, _CloudScale, _CloudSpeed, _CloudBrightness, _StarDensity, _Exposure;
             float4 _IslandSunDir;   // xyz 指向太阳
             float4 _IslandMoonDir;  // xyz 指向月亮
-            float _IslandSkyFlash;  // 闪电时整片天空瞬间变亮（StormFX 写入）
+            float _IslandSkyFlash;  // 闪电时整片天空瞬间变亮（StormFX / WeatherSystem 写入）
+            float _IslandCloudCover; // 天气的云量（>0 时代替材质上的 _CloudCoverage）
+            float _IslandOvercast;   // 阴沉程度：整片天空盖上一层灰云
 
             struct v2f { float4 pos : SV_POSITION; float3 dir : TEXCOORD0; };
 
@@ -125,7 +127,7 @@ Shader "Island/Sky"
                     float2 uv = dir.xz / (dir.y + 0.08) * _CloudScale;
                     float2 wind = float2(1, 0.35) * _Time.y * _CloudSpeed;
                     float n = fbm(uv + wind);
-                    float coverage = 1 - _CloudCoverage;
+                    float coverage = 1 - (_IslandCloudCover > 0.001 ? _IslandCloudCover : _CloudCoverage);
                     float density = smoothstep(coverage - 0.05, coverage + _CloudSoftness, n);
                     // 朝太阳方向偏移采样，估算云的自阴影
                     float n2 = fbm(uv + wind + sun.xz * 0.08);
@@ -134,9 +136,20 @@ Shader "Island/Sky"
                     half3 sunLight = lerp(_SunsetHorizon.rgb * 1.2, half3(1, 1, 1), saturate(sunH * 3)) * day;
                     half3 cloudCol = skyAmb * 0.55 + sunLight * lit * _CloudBrightness + half3(0.02, 0.025, 0.035) * night;
                     cloudCol += sunTint * pow(saturate(cosSun), 8) * (1 - density) * 0.8 * day; // 云边透光
+                    float cloudLum = dot(cloudCol, half3(0.3, 0.55, 0.15));
+                    cloudCol = lerp(cloudCol, cloudLum * half3(0.78, 0.8, 0.84), _IslandOvercast * 0.75); // 阴天的云是灰的
                     float fade = smoothstep(0.0, 0.12, dir.y);
                     cloudCover = density * fade;
                     col = lerp(col, cloudCol, cloudCover * 0.95);
+                }
+
+                // 阴天：整片天空盖上一层均匀的灰云，地平线附近略亮
+                if (_IslandOvercast > 0.001)
+                {
+                    half3 grey = lerp(nightCol * 1.3 + 0.004, half3(0.52, 0.55, 0.6), day) * lerp(1.08, 0.82, saturate(dir.y));
+                    float layer = _IslandOvercast * smoothstep(-0.05, 0.1, dir.y);
+                    col = lerp(col, grey, layer);
+                    cloudCover = max(cloudCover, layer);
                 }
 
                 // 太阳圆盘和月亮画在云后：薄云能透出来，厚云挡住

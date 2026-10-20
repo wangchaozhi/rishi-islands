@@ -182,6 +182,7 @@ namespace Rishi.Builders
             }
             Shot(cam, player, root, cycle, ocean, spawn, spawnYaw, 30f, 10f, "07_wildlife");
             Object.DestroyImmediate(wl.gameObject);
+            CaptureWeather(cam, player, root, cycle, ocean, spawn, spawnYaw);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
@@ -313,6 +314,35 @@ namespace Rishi.Builders
                 var eye = gp + new Vector3(-1.3f, 0f, -1.3f);
                 Shot(cam, player, root, cycle, ocean, new Vector3(eye.x, gp.y + 0.6f, eye.z), Mathf.Atan2(gp.x - eye.x, gp.z - eye.z) * Mathf.Rad2Deg, 30f, 10f, "25_speargun_pickup");
             }
+        }
+
+        /// <summary>动态天气：同一个海滩视角，分别是阴天、小雨、暴雨雷暴（含一次闪电）、浓雾、浓雾的夜。</summary>
+        static void CaptureWeather(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn, float spawnYaw)
+        {
+            var ws = Object.FindFirstObjectByType<Rishi.Weather.WeatherSystem>();
+            if (ws == null || ws.config == null) return;
+            WeatherProfile P(string id) => ws.config.weathers.Find(e => e.profile != null && e.profile.name == "Weather_" + id)?.profile;
+            var shots = new (string id, float time, float flash, string name)[]
+            {
+                ("Overcast", 11f, 0f, "29_weather_overcast"),
+                ("Rain", 11f, 0f, "30_weather_rain"),
+                ("Thunderstorm", 16f, 0f, "31_weather_storm"),
+                ("Thunderstorm", 16f, 1.2f, "32_weather_lightning"),
+                ("Fog", 9f, 0f, "33_weather_fog"),
+                ("Fog", 22.5f, 0f, "34_weather_fog_night"),
+            };
+            float yaw = spawnYaw - 35f;
+            foreach (var (id, time, flash, name) in shots)
+            {
+                var p = P(id);
+                if (p == null) continue;
+                player.SetPositionAndRotation(spawn, Quaternion.Euler(0, yaw, 0)); // 雨幕跟着摄像机，先把摄像机放到位
+                ws.ApplyNow(p, wet: true);
+                Shader.SetGlobalFloat("_IslandSkyFlash", flash);
+                Shot(cam, player, root, cycle, ocean, spawn, yaw, 4f, time, name);
+            }
+            Shader.SetGlobalFloat("_IslandSkyFlash", 0f);
+            ws.ResetVisuals();
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

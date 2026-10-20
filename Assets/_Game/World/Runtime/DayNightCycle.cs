@@ -44,11 +44,21 @@ namespace Rishi.World
             }
         }
 
+        [Header("天气（WeatherSystem 写入，1 / 0 为不影响）")]
+        public float weatherSun = 1f;
+        [Tooltip("阴影浓度倍数（阴天影子变淡）")]
+        public float weatherShadow = 1f;
+        public float weatherAmbient = 1f;
+        public float weatherFog = 1f;
+        public Color weatherFogColor = Color.gray;
+        [Range(0, 1)] public float weatherFogTint;
+
         [Header("水下（UnderwaterFX 写入）")]
         [Range(0, 1)] public float underwater;
         public Color underwaterColor = new Color(0.05f, 0.3f, 0.36f);
         public float underwaterDensity = 0.05f;
 
+        float baseShadow = -1f; // 场景里太阳原本的阴影浓度
         float envTimer;
         int probeRenderId = -1;
         float rushTarget = -1f, rushRate;
@@ -113,7 +123,9 @@ namespace Rishi.World
             float sunset = Mathf.Clamp01(1 - Mathf.Abs(toSun.y - 0.03f) / 0.22f) * Mathf.SmoothStep(0, 1, Mathf.InverseLerp(-0.2f, 0f, toSun.y));
             float night = 1 - Mathf.SmoothStep(0, 1, Mathf.InverseLerp(-0.2f, 0.02f, toSun.y));
 
-            sun.intensity = c.sunMaxIntensity * day;
+            sun.intensity = c.sunMaxIntensity * day * weatherSun;
+            if (baseShadow < 0f) baseShadow = sun.shadowStrength;
+            sun.shadowStrength = baseShadow * Mathf.Clamp01(weatherShadow);
             sun.color = c.sunColor.Evaluate(Mathf.Clamp01(toSun.y * 2.5f));
             sun.enabled = toSun.y > -0.06f;
 
@@ -128,13 +140,19 @@ namespace Rishi.World
             Shader.SetGlobalVector(SunDirId, toSun);
             Shader.SetGlobalVector(MoonDirId, toMoon);
 
-            RenderSettings.ambientIntensity = Mathf.Lerp(c.nightAmbient, c.dayAmbient, day);
+            RenderSettings.ambientIntensity = Mathf.Lerp(c.nightAmbient, c.dayAmbient * weatherAmbient, day);
             Color fog = Color.Lerp(c.nightFog, c.dayFog, day);
             fog = Color.Lerp(fog, c.sunsetFog, sunset * 0.7f);
             RenderSettings.fogColor = fog;
             // 清晨薄雾：5 点起渐浓，日出后约 8 点半散去
             float mist = Mathf.Clamp01(1f - Mathf.Abs(timeOfDay - 7.0f) / 2.0f);
-            RenderSettings.fogDensity = fogOverride >= 0f ? fogOverride : c.baseFogDensity * (1f + c.morningMist * mist * mist);
+            RenderSettings.fogDensity = fogOverride >= 0f ? fogOverride : c.baseFogDensity * (1f + c.morningMist * mist * mist) * weatherFog;
+            if (fogOverride < 0f && weatherFogTint > 0f)
+            {
+                // 天气的雾色按当前亮度缩放，阴雨天的白天是灰白、夜里仍然是暗的
+                float lum = Mathf.Max(fog.maxColorComponent, 0.02f);
+                RenderSettings.fogColor = Color.Lerp(fog, weatherFogColor * lum / Mathf.Max(weatherFogColor.maxColorComponent, 0.02f), weatherFogTint);
+            }
             if (underwater > 0f)
             {
                 RenderSettings.fogColor = Color.Lerp(RenderSettings.fogColor, underwaterColor, underwater);

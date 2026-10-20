@@ -16,6 +16,8 @@ namespace Rishi.World
         public WindConfig config;
         [Tooltip("额外加成（风暴时由 StormFX 设置）")]
         public float boost;
+        [Tooltip("天气的风力倍数（WeatherSystem 设置）")]
+        public float weather = 1f;
 
         static readonly int WindId = Shader.PropertyToID("_IslandWind");
         static WindConfig defaults;
@@ -48,7 +50,7 @@ namespace Rishi.World
             // 风向缓慢摆动
             float wobble = (Mathf.PerlinNoise(t * 0.02f, 5.1f) - 0.5f) * c.directionWobble;
             dir = new Vector2(dir.x * Mathf.Cos(wobble) - dir.y * Mathf.Sin(wobble), dir.x * Mathf.Sin(wobble) + dir.y * Mathf.Cos(wobble));
-            Shader.SetGlobalVector(WindId, new Vector4(dir.x, dir.y, c.strength + boost, Mathf.Max(0, gust) * (1 + boost)));
+            Shader.SetGlobalVector(WindId, new Vector4(dir.x, dir.y, c.strength * weather + boost, Mathf.Max(0, gust) * (weather + boost)));
         }
 
         void OnDisable() => Shader.SetGlobalVector(WindId, Vector4.zero);

@@ -296,7 +296,7 @@ namespace Rishi.Builders
             AudioSetup.SetupPlayer(player, Cycle);
         }
 
-        // ---------- 步骤 5：画质（后处理、风、体积光、植物风动画、TAA、过场电影后处理） ----------
+        // ---------- 步骤 5：画质（后处理、风、体积光、植物风动画、TAA、动态天气、过场电影后处理） ----------
         static void BuildVisualStep()
         {
             FPSSceneBuilder.CreateVolume("IslandPostProcess", temperature: -1f, saturation: -4f, contrast: 5f);
@@ -305,6 +305,12 @@ namespace Rishi.Builders
             CinematicSetup.ApplyFoliageWind();
             CinematicSetup.TuneGameplayProfile("Assets/Art/Generated/IslandPostProcess.asset");
             CinematicSetup.UseTAA(GameObject.Find("Player").GetComponentInChildren<Camera>());
+            // 动态天气（联动天空、光照、雾、风、海浪、体积光、雨、闪电）
+            var weather = new GameObject("Weather").AddComponent<Rishi.Weather.WeatherSystem>();
+            weather.config = ConfigAssets.Weather;
+            weather.dayNight = Cycle;
+            weather.rainMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Generated/Materials/FX_Soft.mat");
+
             var cinematic = CinematicSetup.CreateCinematicVolume();
             foreach (var cp in Object.FindObjectsByType<CutscenePlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None)) cp.cinematicVolume = cinematic;
         }

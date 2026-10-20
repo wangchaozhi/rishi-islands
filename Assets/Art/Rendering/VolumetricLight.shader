@@ -35,6 +35,7 @@ Shader "Island/VolumetricLight"
 
             float _Density, _Intensity, _Anisotropy, _MaxDistance, _HeightFalloff, _NightScale;
             float _IslandUnderwater; // 水下时光柱更浓、带蓝绿色
+            float _IslandVolumetricDim; // 天气：1 - 光柱倍数（阴雨天变淡，浓雾天变浓），0 为不影响
 
             float Hash(float2 p) { return frac(52.9829189 * frac(dot(p, float2(0.06711056, 0.00583715)))); }
 
@@ -92,7 +93,7 @@ Shader "Island/VolumetricLight"
                 }
                 float lum = max(L.color.r, max(L.color.g, L.color.b));
                 float night = saturate(1 - lum * 2); // 月光很弱时放大一点，夜雾更明显
-                half3 scatter = accum * phase * L.color * _Intensity * (1 + night * _NightScale) * 4 * PI;
+                half3 scatter = accum * phase * L.color * _Intensity * max(0, 1 - _IslandVolumetricDim) * (1 + night * _NightScale) * 4 * PI;
                 scatter *= lerp(half3(1, 1, 1), half3(0.35, 0.85, 0.9), _IslandUnderwater);
                 return half4(scene.rgb * lerp(1, trans, 0.25) + scatter, scene.a);
             }

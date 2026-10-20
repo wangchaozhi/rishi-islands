@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 819e09438ec92468c8e850bd2bdc4ea8, type: 3}
+  m_Name: WeatherConfig
+  m_EditorClassIdentifier: Rishi.World::Rishi.World.WeatherConfig
+  weathers:
+  - profile: {fileID: 11400000, guid: fcc7c1ff492084a4085768948f328589, type: 2}
+    weight: 3
+    nightMultiplier: 0.8
+    perFragment: 0
+  - profile: {fileID: 11400000, guid: 2d6b5586dd61e479ba058b6ea5e822b2, type: 2}
+    weight: 2.5
+    nightMultiplier: 1
+    perFragment: 0
+  - profile: {fileID: 11400000, guid: 65ccd8c0bfa904bd29455eff6b82b2c8, type: 2}
+    weight: 1.5
+    nightMultiplier: 1
+    perFragment: 0.15
+  - profile: {fileID: 11400000, guid: 33a027e194b004628b9e9b06c9e2eacc, type: 2}
+    weight: 1.2
+    nightMultiplier: 1
+    perFragment: 0.3
+  - profile: {fileID: 11400000, guid: 1ab848b5b3ce24bae92e2b6630a9ef84, type: 2}
+    weight: 0.5
+    nightMultiplier: 1.2
+    perFragment: 0.45
+  - profile: {fileID: 11400000, guid: ede85b08085d44020afdd2022a3fba78, type: 2}
+    weight: 0.6
+    nightMultiplier: 2.5
+    perFragment: 0.35
+  startWeather: {fileID: 11400000, guid: fcc7c1ff492084a4085768948f328589, type: 2}
+  duration: {x: 180, y: 420}
+  transitionSeconds: 45
+  wetDrySeconds: {x: 40, y: 180}
+  wetMaterialKeywords:
+  - rock
+  - cliff
+  - boulder
+  - stone

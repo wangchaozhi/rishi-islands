@@ -1,0 +1,19 @@
+{
+    "name": "Rishi.Weather",
+    "rootNamespace": "Rishi.Weather",
+    "references": [
+        "Rishi.Core",
+        "Rishi.World",
+        "Rishi.Audio",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

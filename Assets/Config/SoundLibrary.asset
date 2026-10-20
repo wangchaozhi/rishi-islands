@@ -37,6 +37,14 @@ MonoBehaviour:
     pitch: {x: 1, y: 1}
     minDistance: 1
     maxDistance: 50
+  - id: amb_rain
+    clips:
+    - {fileID: 8300000, guid: 8908e9688fbdc45209616608f4c001ee, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
   - id: amb_river
     clips:
     - {fileID: 8300000, guid: 2cbf08a6bf58d3c46a9db9179563d669, type: 3}

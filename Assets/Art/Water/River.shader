@@ -58,6 +58,33 @@ Shader "Island/River"
                 half white : TEXCOORD3;
             };
 
+            float _IslandRain; // 天气：雨量 0~1，水面起雨点涟漪
+            // 雨点涟漪：每个格子里一滴雨，落下后一圈波纹向外扩散；返回法线的 xz 偏移
+            float2 RippleHash(float2 p)
+            {
+                p = float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)));
+                return frac(sin(p) * 43758.5453);
+            }
+            float2 RainRipples(float2 p, float t)
+            {
+                float2 i = floor(p), f = frac(p);
+                float2 n = 0;
+                [unroll] for (int y = -1; y <= 1; y++)
+                [unroll] for (int x = -1; x <= 1; x++)
+                {
+                    float2 g = float2(x, y);
+                    float2 h = RippleHash(i + g);
+                    float2 c = g + 0.2 + 0.6 * h - f;
+                    float life = frac(t + h.x * 7.31 + h.y * 3.17);
+                    float r = length(c);
+                    float d = r - life * 0.9;
+                    float wave = sin(d * 38) * exp(-d * d * 160) * (1 - life) * (1 - life);
+                    n += c / max(r, 1e-3) * wave;
+                }
+                return n;
+            }
+            float2 Rain2(float2 xz) { return RainRipples(xz * 2.3, _Time.y * 1.3) + RainRipples(xz * 3.4 + 5.3, _Time.y * 1.6) * 0.7; }
+
             Varyings vert(Attributes v)
             {
                 Varyings o;
@@ -80,6 +107,11 @@ Shader "Island/River"
                 float2 dn = (n1.xy + n2.xy) * _NormalStrength;
                 float3 N = normalize(float3(dn.x, 1, dn.y));
                 float3 V = normalize(_WorldSpaceCameraPos - i.positionWS);
+                if (_IslandRain > 0.001)
+                {
+                    float2 rp = Rain2(i.positionWS.xz);
+                    N = normalize(N + float3(rp.x, 0, rp.y) * _IslandRain * 0.5);
+                }
 
                 float2 suv = GetNormalizedScreenSpaceUV(i.positionCS);
                 float surf = LinearEyeDepth(i.positionCS.z, _ZBufferParams);

@@ -21,6 +21,18 @@ namespace Rishi.Builders
         public static WildlifeConfig Wildlife => LoadOrCreate<WildlifeConfig>("Wildlife");
         public static SoundLibrary Sounds => LoadOrCreate<SoundLibrary>("SoundLibrary");
 
+        /// <summary>动态天气的调度和六种天气（Weather_Clear / Cloudy / Overcast / Rain / Thunderstorm / Fog）。</summary>
+        public static WeatherConfig Weather => LoadOrCreate("WeatherConfig", () =>
+        {
+            var c = ScriptableObject.CreateInstance<WeatherConfig>();
+            foreach (var (id, weight, night, frag) in WeatherConfig.DefaultEntries)
+                c.weathers.Add(new WeatherConfig.Entry { profile = WeatherProfileAsset(id), weight = weight, nightMultiplier = night, perFragment = frag });
+            c.startWeather = c.weathers[0].profile;
+            return c;
+        });
+
+        public static WeatherProfile WeatherProfileAsset(string id) => LoadOrCreate("Weather_" + id, () => WeatherProfile.CreateDefault(id));
+
         public static T LoadOrCreate<T>(string name, Func<T> create = null) where T : ScriptableObject
         {
             string path = $"{Folder}/{name}.asset";
@@ -36,7 +48,7 @@ namespace Rishi.Builders
         [MenuItem("Tools/Island/打开配置文件夹")]
         static void Reveal()
         {
-            _ = DayNight; _ = Wind; _ = Storm; _ = Wildlife; _ = Sounds; // 没有的先建出默认配置
+            _ = DayNight; _ = Wind; _ = Storm; _ = Wildlife; _ = Sounds; _ = Weather; // 没有的先建出默认配置
             AssetDatabase.SaveAssets();
             var folder = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(Folder);
             Selection.activeObject = folder;
