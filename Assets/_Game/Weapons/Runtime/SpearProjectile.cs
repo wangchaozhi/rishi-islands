@@ -83,7 +83,7 @@ namespace Rishi.Weapons
         {
             stuck = true;
             float speedFactor = Mathf.Clamp01(velocity.magnitude / Mathf.Max(startSpeed, 0.01f));
-            var target = hit.collider.GetComponentInParent<IDamageable>();
+            var target = GameSignals.IsPlayer(hit.collider) ? null : hit.collider.GetComponentInParent<IDamageable>();
             if (target != null && def != null)
                 OnHit?.Invoke(target.TakeDamage(def.damage * Mathf.Lerp(0.3f, 1f, speedFactor)));
             if (hit.rigidbody != null) hit.rigidbody.AddForceAtPosition(velocity.normalized * 4f * speedFactor, hit.point, ForceMode.Impulse);

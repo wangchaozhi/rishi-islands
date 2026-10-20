@@ -9,7 +9,8 @@
         "Rishi.Audio",
         "Rishi.Story",
         "Rishi.Weather",
-        "Rishi.Inventory"
+        "Rishi.Inventory",
+        "Rishi.Player"
     ],
     "includePlatforms": [
         "Editor"

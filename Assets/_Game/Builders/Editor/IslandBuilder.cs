@@ -208,6 +208,15 @@ namespace Rishi.Builders
             IslandStoryBuilder.BuildCamp(terrain, spawnPoint);
             IslandStoryBuilder.BuildRuin(terrain);
 
+            // 篝火：营地那圈熄灭的篝火、出生沙滩后面、神殿台阶前；点燃后是安全区和复活点
+            var campRoot = GameObject.Find("FatherCamp").transform;
+            CampfireBuilder.Build(campRoot, IslandStoryBuilder.Ground(terrain, campRoot.TransformPoint(new Vector3(0, 0, 1.4f))), campRoot.eulerAngles.y, ring: false, "CampFire");
+            var beachFire = IslandStoryBuilder.Ground(terrain, spawnPoint + new Vector3(7f, 0, 9f));
+            if (beachFire.y < 1.2f) beachFire = IslandStoryBuilder.Ground(terrain, spawnPoint + new Vector3(0, 0, 12f)); // 别落在水里
+            CampfireBuilder.Build(null, beachFire, 20f, ring: true, "BeachFire");
+            var temple = GameObject.Find("SunTemple").transform;
+            CampfireBuilder.Build(temple, IslandStoryBuilder.Ground(terrain, temple.TransformPoint(new Vector3(-3.5f, 0, 14f))), temple.eulerAngles.y, ring: true, "TempleFire");
+
             // 武器与道具拾取物（放在沉船、营地旁）
             GameplaySetup.PlacePickups(terrain, spawnPoint);
 
@@ -223,6 +232,7 @@ namespace Rishi.Builders
             player.GetComponent<HUD>().dayNight = cycle;
             cam.GetComponent<UnderwaterFX>().dayNight = cycle;
             GameplaySetup.SetupFlashlight(player, cam, FPSSceneBuilder.WeaponLayer); // 手电筒在营地捡到后才能用
+            player.AddComponent<PlayerHealth>();
 
             // 剧情系统
             var story = new GameObject("Story");
@@ -284,6 +294,7 @@ namespace Rishi.Builders
             }
             Add("Shipwreck", IslandStoryBuilder.WreckClearRadius);
             Add("FatherCamp", IslandStoryBuilder.CampClearRadius);
+            Add("BeachFire", 3.5f);
             zones.Add((IslandStoryBuilder.RuinCenter, IslandStoryBuilder.RuinClearRadius));
         }
 

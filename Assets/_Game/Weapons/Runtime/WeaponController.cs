@@ -243,7 +243,7 @@ namespace Rishi.Weapons
 
         IDamageable ApplyHit(RaycastHit hit, float damage, Vector3 force)
         {
-            var target = hit.collider.GetComponentInParent<IDamageable>();
+            var target = GameSignals.IsPlayer(hit.collider) ? null : hit.collider.GetComponentInParent<IDamageable>(); // 玩家自己也是 IDamageable，打不到自己
             if (target != null)
             {
                 bool killed = target.TakeDamage(damage);

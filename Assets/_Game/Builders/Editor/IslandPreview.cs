@@ -184,6 +184,7 @@ namespace Rishi.Builders
             Object.DestroyImmediate(wl.gameObject);
             CaptureWeather(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureFlashlight(cam, player, root, cycle, ocean, spawn, spawnYaw);
+            CaptureCampfires(cam, player, root, cycle, ocean);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
@@ -365,6 +366,23 @@ namespace Rishi.Builders
                 var eye = p + new Vector3(0.9f, 0f, -0.9f);
                 eye.y = p.y + 0.45f;
                 Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(p.x - eye.x, p.z - eye.z) * Mathf.Rad2Deg, 38f, 10.5f, "37_flashlight_pickup");
+            }
+        }
+
+        /// <summary>篝火：营地和沙滩的篝火在夜里点燃的样子，以及白天熄灭的沙滩篝火。</summary>
+        static void CaptureCampfires(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean)
+        {
+            foreach (var (name, time, lit, file) in new[] { ("CampFire", 21.5f, true, "38_campfire_camp_night"), ("BeachFire", 22f, true, "39_campfire_beach_night"), ("BeachFire", 10f, false, "40_campfire_beach_day") })
+            {
+                var go = GameObject.Find(name);
+                if (go == null) continue;
+                var fire = go.GetComponent<Rishi.Player.Campfire>();
+                fire.PreviewLit(lit);
+                var p = go.transform.position;
+                var eye = p + go.transform.right * 3.2f + go.transform.forward * 2.2f;
+                eye.y = p.y + 1.0f;
+                Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(p.x - eye.x, p.z - eye.z) * Mathf.Rad2Deg, 14f, time, file);
+                fire.PreviewLit(false);
             }
         }
 

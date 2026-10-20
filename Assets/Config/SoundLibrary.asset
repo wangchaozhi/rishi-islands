@@ -135,6 +135,14 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 5
+  - id: breath_hurt
+    clips:
+    - {fileID: 8300000, guid: d687b02d141144098902ddebf0f32b8a, type: 3}
+    category: 3
+    volume: 0.8
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
   - id: bubbles
     clips:
     - {fileID: 8300000, guid: ff467e5a0b6fccd4faefcaf358404298, type: 3}
@@ -187,6 +195,22 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 5
+  - id: fire_crackle
+    clips:
+    - {fileID: 8300000, guid: 7a6a13ac625354c1aa108dd6aa506dc1, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 20
+  - id: fire_ignite
+    clips:
+    - {fileID: 8300000, guid: 537e2b05157c4408aa3c853f4544e801, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 20
   - id: fish_scatter
     clips:
     - {fileID: 8300000, guid: 5772b39a220d11d42b78dc359a3bbb24, type: 3}
@@ -392,6 +416,24 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 10
+  - id: player_death
+    clips:
+    - {fileID: 8300000, guid: 4fc733fc07e3047f78c4b228f66928f5, type: 3}
+    category: 3
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
+  - id: player_hurt
+    clips:
+    - {fileID: 8300000, guid: 712938ddde8394553b1186e6660340a3, type: 3}
+    - {fileID: 8300000, guid: bf432d7a6af814bf2b5e74798d4c1da7, type: 3}
+    - {fileID: 8300000, guid: 3490a23e80e334f2485ec09f47224f4e, type: 3}
+    category: 3
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
   - id: puzzle_solved
     clips:
     - {fileID: 8300000, guid: 9e19c40d5cedd3045ae14d34ceccd6dc, type: 3}

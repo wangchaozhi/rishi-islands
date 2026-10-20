@@ -21,7 +21,7 @@ namespace Rishi.UI
         Texture2D vignette;
         float hitTime = -1f;
         bool lastHitKill;
-        float oxygenAlpha;
+        float oxygenAlpha, healthAlpha;
 
         void OnEnable()
         {
@@ -46,6 +46,7 @@ namespace Rishi.UI
             float cx = Screen.width / 2f, cy = Screen.height / 2f;
 
             DrawUnderwaterOverlay();
+            DrawDamageOverlay();
 
             bool hideCrosshair = (player != null && player.IsSprinting) || GameSignals.InputBlocked;
             if (!hideCrosshair)
@@ -72,6 +73,7 @@ namespace Rishi.UI
             DrawWeaponBar();
             DrawOxygen();
             DrawFlashlight();
+            DrawHealth();
 
             string hint = player != null && !player.IsCursorLocked && !GameSignals.InputBlocked
                 ? "点击画面继续"
@@ -141,6 +143,41 @@ namespace Rishi.UI
             GUI.color = new Color(1, 1, 1, 0.8f * oxygenAlpha);
             string depth = GameSignals.HeadUnderwater ? $"   深度 {GameSignals.CameraDepth:0.0} 米" : "";
             GUI.Label(new Rect(x, y - 24, w + 200, 22), "氧气" + depth, labelStyle);
+            GUI.color = old;
+        }
+
+        /// <summary>受伤：整屏闪红；生命低时四周泛起随心跳脉动的红色暗角。</summary>
+        void DrawDamageOverlay()
+        {
+            float flash = GameSignals.DamageFlash;
+            if (flash > 0.001f)
+                GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, new Color(0.6f, 0f, 0f, flash * 0.35f), 0, 0);
+            float h = GameSignals.Health;
+            float low = Mathf.Clamp01(1f - h / 0.35f);
+            if (low > 0.001f || flash > 0.001f)
+            {
+                float pulse = 0.75f + 0.25f * Mathf.Sin(Time.time * Mathf.Lerp(5f, 9f, low));
+                float a = Mathf.Max(low * pulse, flash * 0.8f);
+                GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), vignette, ScaleMode.StretchToFill, true, 0, new Color(0.55f, 0f, 0f, a), 0, 0);
+            }
+        }
+
+        /// <summary>左下角的生命条：受伤后或不满血时显示。</summary>
+        void DrawHealth()
+        {
+            float h = GameSignals.Health;
+            bool show = h < 0.999f || GameSignals.DamageFlash > 0.01f;
+            healthAlpha = Mathf.MoveTowards(healthAlpha, show ? 1f : 0f, Time.unscaledDeltaTime * 1.5f);
+            if (healthAlpha <= 0.001f) return;
+            float w = 200, bh = 8, x = 30, y = Screen.height - 104;
+            Color fill = Color.Lerp(new Color(0.85f, 0.15f, 0.12f), new Color(0.9f, 0.85f, 0.8f), Mathf.Clamp01((h - 0.2f) / 0.6f));
+            fill.a = 0.9f * healthAlpha;
+            GUI.DrawTexture(new Rect(x - 2, y - 2, w + 4, bh + 4), Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, new Color(0, 0, 0, 0.45f * healthAlpha), 0, 5);
+            GUI.DrawTexture(new Rect(x, y, w * h, bh), Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, fill, 0, 4);
+            var old = GUI.color;
+            GUI.color = new Color(1, 1, 1, 0.85f * healthAlpha);
+            flashStyle ??= new GUIStyle(labelStyle) { alignment = TextAnchor.LowerLeft };
+            GUI.Label(new Rect(x, y - 24, 260, 22), GameSignals.InSafeZone ? "生命   篝火旁 · 安全" : "生命", flashStyle);
             GUI.color = old;
         }
 

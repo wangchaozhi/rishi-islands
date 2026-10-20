@@ -57,6 +57,14 @@ namespace Rishi.Core
         /// <summary>全屏黑场（0~1），昏迷、传送时用。</summary>
         public static float ScreenFade { get; set; }
 
+        // ---------- 生命 ----------
+        /// <summary>玩家生命比例（0~1），PlayerHealth 写入。</summary>
+        public static float Health { get; set; } = 1f;
+        /// <summary>刚受伤时的红屏强度（0~1，逐渐消退），HUD 读取。</summary>
+        public static float DamageFlash { get; set; }
+        /// <summary>玩家在点燃的篝火旁（安全区）：以后的怪物不靠近。</summary>
+        public static bool InSafeZone { get; set; }
+
         // ---------- 手电筒 ----------
         /// <summary>手电筒亮着（以后的影嗣据此判断是否被光照到）。</summary>
         public static bool FlashlightOn { get; set; }
@@ -106,6 +114,9 @@ namespace Rishi.Core
             ScreenFade = 0f;
             Rain = 0f;
             Weather = "";
+            Health = 1f;
+            DamageFlash = 0f;
+            InSafeZone = false;
             FlashlightOn = false;
             FlashlightCharge = -1f;
             Flashlight = null;
