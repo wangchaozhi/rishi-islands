@@ -16,6 +16,8 @@ namespace Rishi.Audio
         public DayNightCycle dayNight;
         public float fadeSpeed = 0.35f;
         [Range(0, 1)] public float silence;
+        [Tooltip("危险逼近时环境声安静下来（影嗣写入）")]
+        [Range(0, 1)] public float threatSilence;
         [Header("天气（WeatherSystem 写入）")]
         [Tooltip("压低白天的鸟叫（下雨时）")]
         [Range(0, 1)] public float weatherBirdDamp;
@@ -87,7 +89,7 @@ namespace Rishi.Audio
             float mul = AudioManager.Instance != null ? AudioManager.Instance.CategoryVolume(SoundCategory.Ambience) : 1f;
             foreach (var l in layers.Values)
             {
-                float t = l.target * (1f - silence) * mul;
+                float t = l.target * (1f - Mathf.Max(silence, threatSilence)) * mul;
                 l.source.volume = Mathf.MoveTowards(l.source.volume, t, fadeSpeed * Time.deltaTime);
             }
         }

@@ -186,6 +186,7 @@ namespace Rishi.Builders
             CaptureFlashlight(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureCampfires(cam, player, root, cycle, ocean);
             CaptureCreature(cam, player, root, cycle, ocean, spawn, spawnYaw);
+            CaptureShade(cam, player, root, cycle, ocean, spawn, spawnYaw);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
@@ -407,6 +408,32 @@ namespace Rishi.Builders
             Shot(cam, player, root, cycle, ocean, spawn, spawnYaw - 35f, 4f, 18.4f, "41_creature_dusk");
             Shot(cam, player, root, cycle, ocean, spawn, spawnYaw - 35f, 4f, 22.5f, "42_creature_night");
             Object.DestroyImmediate(c.gameObject);
+        }
+
+        /// <summary>影嗣：夜里站在沙滩上的黑烟人形，不开手电和用手电照着各一张。</summary>
+        static void CaptureShade(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn, float spawnYaw)
+        {
+            var spawner = Object.FindFirstObjectByType<Rishi.Creatures.ShadeSpawner>();
+            if (spawner == null || spawner.shadeDef == null) return;
+            float yaw = spawnYaw + 150f; // 朝丛林
+            var fwd = Quaternion.Euler(0, yaw, 0) * Vector3.forward;
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var pos = spawn + fwd * 7f;
+            pos.y = terrain.SampleHeight(pos) + terrain.transform.position.y;
+            var shade = Rishi.Creatures.Shade.Spawn(spawner.shadeDef, pos, Quaternion.LookRotation(-fwd), cycle, spawner.bodyMaterial, spawner.smokeMaterial, spawner.eyeMaterial);
+            shade.smoke.Simulate(3f, true, true);
+            Shot(cam, player, root, cycle, ocean, spawn, yaw, 4f, 22.5f, "43_shade_dark");
+            var fl = player.GetComponent<Flashlight>();
+            var wc = cam.GetComponent<WeaponController>();
+            if (fl != null)
+            {
+                if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(false);
+                fl.PreviewOn(true);
+                Shot(cam, player, root, cycle, ocean, spawn, yaw, 4f, 22.5f, "44_shade_flashlight");
+                fl.PreviewOn(false);
+                if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
+            }
+            Object.DestroyImmediate(shade.gameObject);
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

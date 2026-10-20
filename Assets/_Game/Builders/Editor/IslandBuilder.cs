@@ -236,6 +236,7 @@ namespace Rishi.Builders
             var debugSpawner = new GameObject("CreatureDebug").AddComponent<Rishi.Creatures.CreatureDebugSpawner>(); // F10 生成测试生物
             debugSpawner.testCreature = ConfigAssets.TestCreature;
             debugSpawner.dayNight = cycle;
+            ShadeBuilder.CreateSpawner(cycle); // 影嗣：夜里在黑暗中出现，F11 调试生成
             var fear = player.AddComponent<PlayerFear>();
             fear.dayNight = cycle;
             fear.shakeTarget = cam.transform;

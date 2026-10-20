@@ -22,6 +22,8 @@ namespace Rishi.Creatures
         public DayNightCycle dayNight;
         [Tooltip("眼睛位置（视线起点），为空时用身体上方 1.5 米")]
         public Transform eyes;
+        [Tooltip("移动速度倍数（影嗣被盯着时几乎不动）")]
+        public float speedMultiplier = 1f;
 
         public CreatureState State { get; private set; } = CreatureState.Idle;
         float health = -1f; // 还没初始化时按满血算（编辑器里的测试不会调用 Awake）
@@ -206,6 +208,7 @@ namespace Rishi.Creatures
 
         void MoveTo(Vector3 dest, float speed)
         {
+            speed *= Mathf.Max(0f, speedMultiplier);
             if (agent != null && agent.enabled && agent.isOnNavMesh)
             {
                 agent.speed = speed;

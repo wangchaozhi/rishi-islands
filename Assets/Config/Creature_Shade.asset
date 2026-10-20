@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d78c033cb63424031a7c822c57054dfa, type: 3}
+  m_Name: Creature_Shade
+  m_EditorClassIdentifier: Rishi.Creatures::Rishi.Creatures.CreatureDef
+  displayName: "\u5F71\u55E3"
+  maxHealth: 60
+  walkSpeed: 1.3
+  runSpeed: 8
+  wanderRadius: 25
+  sightRange: 38
+  sightAngle: 160
+  flashlightSightBonus: 1.5
+  memorySeconds: 10
+  hearing: 1.4
+  lightReaction: 1
+  stunSeconds: 1.2
+  retreatSeconds: 3.5
+  attackDamage: 22
+  attackRange: 1.6
+  attackCooldown: 1.3
+  attackWindup: 0.3
+  activeAtDay: 0
+  activeAtNight: 1
+  fearPerSecond: 0.09
+  idleSound: 
+  idleInterval: {x: 6, y: 14}
+  alertSound: shade_alert
+  attackSound: shade_bite
+  hurtSound: shade_hurt
+  deathSound: shade_death

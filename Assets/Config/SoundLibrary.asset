@@ -492,6 +492,55 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1.5
     maxDistance: 45
+  - id: shade_alert
+    clips:
+    - {fileID: 8300000, guid: 499e3035f3b4b4adf87ecce791587148, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2.5
+    maxDistance: 40
+  - id: shade_bite
+    clips:
+    - {fileID: 8300000, guid: f5d180c4442724e02a715cf265e3e13b, type: 3}
+    - {fileID: 8300000, guid: 331da863af793489eb83fe0a4fb300c5, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2.5
+    maxDistance: 40
+  - id: shade_death
+    clips:
+    - {fileID: 8300000, guid: 111c5ebca04674cfcb71bbab1ecb8e4e, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2.5
+    maxDistance: 40
+  - id: shade_hurt
+    clips:
+    - {fileID: 8300000, guid: 778e67e25470d4da1ab5e3e80b74f0ed, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2.5
+    maxDistance: 40
+  - id: shade_scream
+    clips:
+    - {fileID: 8300000, guid: eeadd6ead652b43e2a83dfef9ccfe688, type: 3}
+    category: 1
+    volume: 1
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 4
+    maxDistance: 70
+  - id: shade_whisper
+    clips:
+    - {fileID: 8300000, guid: 2046a4f7a70214bceaef142fd11edc4e, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2.5
+    maxDistance: 40
   - id: spear_hit_flesh
     clips:
     - {fileID: 8300000, guid: d3b6fe6005b825c458ea16ebf1ad0905, type: 3}
