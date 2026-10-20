@@ -23,14 +23,15 @@ namespace Rishi.World
         public Gradient sunColor = DefaultSunColor();
 
         [Header("月亮")]
-        public float moonIntensity = 0.25f;
+        public float moonIntensity = 0.12f;
         [Tooltip("月亮落后太阳对面的角度（度）：>0 时清晨还能在西边天空看到月亮")]
         public float moonLag = 30f;
 
         [Header("环境光")]
         [Tooltip("雨林林冠下全靠天光和反弹光，适当提高")]
         public float dayAmbient = 1.5f;
-        public float nightAmbient = 0.35f;
+        [Tooltip("夜里的环境光：越低越黑，没有手电筒几乎看不清")]
+        public float nightAmbient = 0.12f;
         [Tooltip("环境光与反射探针的刷新间隔（秒）")]
         public float environmentUpdateInterval = 1.5f;
 
@@ -42,6 +43,8 @@ namespace Rishi.World
         public float baseFogDensity = 0.0015f;
         [Tooltip("清晨薄雾的额外浓度（倍数）")]
         public float morningMist = 1.8f;
+        [Tooltip("夜里的雾浓度倍数（夜里海雾更浓）")]
+        public float nightFogMultiplier = 2.4f;
 
         [Header("节奏")]
         [Tooltip("拿到第一块碎片之前放慢时间，保证第一章能在白天玩完")]

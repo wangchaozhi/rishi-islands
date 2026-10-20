@@ -57,6 +57,14 @@ namespace Rishi.Core
         /// <summary>全屏黑场（0~1），昏迷、传送时用。</summary>
         public static float ScreenFade { get; set; }
 
+        // ---------- 手电筒 ----------
+        /// <summary>手电筒亮着（以后的影嗣据此判断是否被光照到）。</summary>
+        public static bool FlashlightOn { get; set; }
+        /// <summary>手电筒电量 0~1；还没拿到手电筒时为 -1。</summary>
+        public static float FlashlightCharge { get; set; } = -1f;
+        /// <summary>手电筒的光源（亮着时用来判断照射范围）。</summary>
+        public static Light Flashlight { get; set; }
+
         // ---------- 天气 ----------
         /// <summary>当前雨量（0~1），天气系统写入；以后的怪物据此在雨夜更活跃。</summary>
         public static float Rain { get; set; }
@@ -98,6 +106,9 @@ namespace Rishi.Core
             ScreenFade = 0f;
             Rain = 0f;
             Weather = "";
+            FlashlightOn = false;
+            FlashlightCharge = -1f;
+            Flashlight = null;
         }
     }
 }

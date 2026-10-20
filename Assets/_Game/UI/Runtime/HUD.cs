@@ -17,7 +17,7 @@ namespace Rishi.UI
         public PlayerController player;
         public DayNightCycle dayNight;
 
-        GUIStyle ammoStyle, ammoShadow, hintStyle, slotStyle, labelStyle;
+        GUIStyle ammoStyle, ammoShadow, hintStyle, slotStyle, labelStyle, flashStyle;
         Texture2D vignette;
         float hitTime = -1f;
         bool lastHitKill;
@@ -71,6 +71,7 @@ namespace Rishi.UI
 
             DrawWeaponBar();
             DrawOxygen();
+            DrawFlashlight();
 
             string hint = player != null && !player.IsCursorLocked && !GameSignals.InputBlocked
                 ? "点击画面继续"
@@ -140,6 +141,26 @@ namespace Rishi.UI
             GUI.color = new Color(1, 1, 1, 0.8f * oxygenAlpha);
             string depth = GameSignals.HeadUnderwater ? $"   深度 {GameSignals.CameraDepth:0.0} 米" : "";
             GUI.Label(new Rect(x, y - 24, w + 200, 22), "氧气" + depth, labelStyle);
+            GUI.color = old;
+        }
+
+        /// <summary>左下角的手电筒电量：拿到手电筒后显示，亮着时更醒目，电量低时变红闪烁。</summary>
+        void DrawFlashlight()
+        {
+            float c = GameSignals.FlashlightCharge;
+            if (c < 0f) return;
+            bool on = GameSignals.FlashlightOn;
+            float a = on ? 0.9f : 0.45f;
+            float w = 120, h = 8, x = 30, y = Screen.height - 46;
+            Color fill = c < 0.15f ? new Color(1f, 0.35f, 0.25f) : new Color(1f, 0.9f, 0.6f);
+            if (c < 0.15f && on) fill.a = 0.55f + 0.45f * Mathf.Abs(Mathf.Sin(Time.time * 5f));
+            fill.a *= a;
+            GUI.DrawTexture(new Rect(x - 2, y - 2, w + 4, h + 4), Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, new Color(0, 0, 0, 0.45f * a), 0, 5);
+            GUI.DrawTexture(new Rect(x, y, w * c, h), Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, fill, 0, 4);
+            var old = GUI.color;
+            GUI.color = new Color(1, 1, 1, a);
+            flashStyle ??= new GUIStyle(labelStyle) { alignment = TextAnchor.LowerLeft };
+            GUI.Label(new Rect(x, y - 24, 260, 22), on ? "手电筒  [F]" : "手电筒 关  [F]", flashStyle);
             GUI.color = old;
         }
 

@@ -222,6 +222,7 @@ namespace Rishi.Builders
             cam.farClipPlane = 3000f;
             player.GetComponent<HUD>().dayNight = cycle;
             cam.GetComponent<UnderwaterFX>().dayNight = cycle;
+            GameplaySetup.SetupFlashlight(player, cam, FPSSceneBuilder.WeaponLayer); // 手电筒在营地捡到后才能用
 
             // 剧情系统
             var story = new GameObject("Story");

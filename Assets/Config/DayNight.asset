@@ -47,10 +47,10 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
-  moonIntensity: 0.25
+  moonIntensity: 0.12
   moonLag: 30
   dayAmbient: 1.5
-  nightAmbient: 0.35
+  nightAmbient: 0.12
   environmentUpdateInterval: 1.5
   dayFog: {r: 0.44, g: 0.56, b: 0.7, a: 1}
   sunsetFog: {r: 0.86, g: 0.62, b: 0.45, a: 1}

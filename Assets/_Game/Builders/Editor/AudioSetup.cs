@@ -63,6 +63,8 @@ namespace Rishi.Builders
             ("spear_hit", SoundCategory.Sfx, 0.8f, 1f, 30f),
             ("clam_", SoundCategory.Sfx, 0.8f, 1f, 15f),
             ("fish_scatter", SoundCategory.Sfx, 0.5f, 1f, 15f),
+            ("flashlight_", SoundCategory.Sfx, 0.7f, 1f, 5f),
+            ("battery_", SoundCategory.Sfx, 0.7f, 1f, 5f),
         };
 
         public static AudioManager CreateManager()

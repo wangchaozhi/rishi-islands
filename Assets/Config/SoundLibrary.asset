@@ -127,6 +127,14 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 2
     maxDistance: 40
+  - id: battery_insert
+    clips:
+    - {fileID: 8300000, guid: 9e8a2bf3a8f354d64bc7f1724535fce0, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
   - id: bubbles
     clips:
     - {fileID: 8300000, guid: ff467e5a0b6fccd4faefcaf358404298, type: 3}
@@ -197,6 +205,14 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 2
     maxDistance: 30
+  - id: flashlight_click
+    clips:
+    - {fileID: 8300000, guid: 2a6d8e861045e49ceaa92245da040ccc, type: 3}
+    category: 1
+    volume: 0.7
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1
+    maxDistance: 5
   - id: fragment_get
     clips:
     - {fileID: 8300000, guid: 63985c13868ab714f9db6bee9e1e1a51, type: 3}

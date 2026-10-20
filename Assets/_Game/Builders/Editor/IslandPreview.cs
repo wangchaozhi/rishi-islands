@@ -183,6 +183,7 @@ namespace Rishi.Builders
             Shot(cam, player, root, cycle, ocean, spawn, spawnYaw, 30f, 10f, "07_wildlife");
             Object.DestroyImmediate(wl.gameObject);
             CaptureWeather(cam, player, root, cycle, ocean, spawn, spawnYaw);
+            CaptureFlashlight(cam, player, root, cycle, ocean, spawn, spawnYaw);
             Debug.Log("[Island] 预览截图已写入 Screenshots/Island/");
         }
 
@@ -343,6 +344,28 @@ namespace Rishi.Builders
             }
             Shader.SetGlobalFloat("_IslandSkyFlash", 0f);
             ws.ResetVisuals();
+        }
+
+        /// <summary>手电筒：夜里同一个视角关灯 / 开灯，以及营地里的手电筒拾取物。</summary>
+        static void CaptureFlashlight(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn, float spawnYaw)
+        {
+            var fl = player.GetComponent<Flashlight>();
+            if (fl == null) return;
+            // 出生点转身朝向丛林，夜里 22 点半
+            float yaw = spawnYaw + 150f;
+            fl.PreviewOn(false);
+            Shot(cam, player, root, cycle, ocean, spawn, yaw, 16f, 22.5f, "35_night_dark");
+            fl.PreviewOn(true);
+            Shot(cam, player, root, cycle, ocean, spawn, yaw, 16f, 22.5f, "36_night_flashlight");
+            fl.PreviewOn(false);
+            var pickup = GameObject.Find("FlashlightPickup");
+            if (pickup != null)
+            {
+                var p = pickup.transform.position;
+                var eye = p + new Vector3(0.9f, 0f, -0.9f);
+                eye.y = p.y + 0.45f;
+                Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(p.x - eye.x, p.z - eye.z) * Mathf.Rad2Deg, 38f, 10.5f, "37_flashlight_pickup");
+            }
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

@@ -30,7 +30,7 @@ namespace Rishi.Builders
         const string Art = "Assets/Art";
         const string Gen = "Assets/Art/Generated";
         const string SkyPath = "Assets/Art/HDRI/sky_clamped_4k.hdr";
-        const int WeaponLayer = 8;
+        internal const int WeaponLayer = 8;
         // HDRI 中太阳的方向（由 HDR 最亮区域算出，Skybox/Panoramic 坐标系）
         static readonly Vector3 SunDirection = new Vector3(0.5543f, 0.7418f, -0.3775f);
 

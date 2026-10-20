@@ -51,6 +51,17 @@ namespace Rishi.Builders
                 "沉船木箱里的古金币，一面刻着太阳，另一面刻着一只闭着的眼睛。");
             var coconut = DefItem("coconut", "椰子", ItemCategory.Consumable, 6, "椰", new Color(0.42f, 0.3f, 0.16f),
                 "从椰子树下捡的青椰子，用砍刀劈开就能喝。");
+            DefItem("flashlight", "手电筒", ItemCategory.Material, 1, "灯", new Color(0.55f, 0.42f, 0.22f),
+                "父亲的老式黄铜手电筒，开关有点涩。按 F 开关，亮着会耗电。");
+            var battery = DefItem("battery", "电池", ItemCategory.Consumable, 8, "池", new Color(0.3f, 0.36f, 0.3f),
+                "一节 1 号电池。手电筒没电时会自动换上，也可以在这里直接装进去。");
+            if (!battery.usable)
+            {
+                battery.usable = true;
+                battery.useVerb = "装进手电筒";
+                battery.useMessage = "手电筒换上了新电池。";
+                EditorUtility.SetDirty(battery);
+            }
             if (!coconut.usable)
             {
                 coconut.usable = true;
@@ -320,6 +331,102 @@ namespace Rishi.Builders
             IslandStoryBuilder.NoteGlow(go.transform);
         }
 
+        // ================= 手电筒 =================
+
+        /// <summary>手电筒模型：最长的轴是筒身，截面大的一端是灯头，转成灯头朝 +Z、长约 length 米、中心在原点。</summary>
+        public static GameObject FlashlightModel(Transform parent, string name, float length)
+        {
+            var root = new GameObject(name);
+            root.transform.SetParent(parent, false);
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(FPSSceneBuilder.LoadModel("Models/vintage_flashlight"));
+            model.transform.SetParent(root.transform, false);
+            FPSSceneBuilder.AssignMaterial(model, FPSSceneBuilder.Pbr("Flashlight", "Models/vintage_flashlight", 1f));
+
+            var pts = new List<Vector3>();
+            foreach (var mf in model.GetComponentsInChildren<MeshFilter>())
+                foreach (var v in mf.sharedMesh.vertices)
+                    pts.Add(root.transform.InverseTransformPoint(mf.transform.TransformPoint(v)));
+            Vector3 min = pts[0], max = pts[0];
+            foreach (var q in pts) { min = Vector3.Min(min, q); max = Vector3.Max(max, q); }
+            var size = max - min;
+            int axis = size.x >= size.y && size.x >= size.z ? 0 : size.y >= size.z ? 1 : 2;
+            float lo = min[axis], hi = max[axis], span = hi - lo;
+            var center = (min + max) / 2f;
+            // 两端各取 15% 的顶点，比较到轴心的最大半径
+            float Radius(bool high)
+            {
+                float r = 0f;
+                foreach (var q in pts)
+                {
+                    float a = q[axis];
+                    if (high ? a < hi - span * 0.15f : a > lo + span * 0.15f) continue;
+                    var d = q - center; d[axis] = 0f;
+                    r = Mathf.Max(r, d.magnitude);
+                }
+                return r;
+            }
+            var dir = Vector3.zero;
+            dir[axis] = Radius(true) >= Radius(false) ? 1f : -1f; // 灯头方向（模型坐标）
+            var turn = Quaternion.FromToRotation(dir, Vector3.forward);
+            model.transform.localRotation = turn * model.transform.localRotation; // 保留 FBX 根节点自带的轴向修正
+            float scale = length / Mathf.Max(span, 1e-4f);
+            model.transform.localScale *= scale;
+            model.transform.localPosition = -(turn * center) * scale;
+            foreach (var r in model.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
+            return root;
+        }
+
+        /// <summary>给玩家装上手电筒：摄像机下的聚光灯 + 左下角手里的模型（武器层） + Flashlight 组件。</summary>
+        public static Flashlight SetupFlashlight(GameObject player, Camera cam, int weaponLayer)
+        {
+            EnsureAssets();
+            var beam = new GameObject("FlashlightBeam").AddComponent<Light>();
+            beam.transform.SetParent(cam.transform, false);
+            beam.transform.localPosition = new Vector3(-0.18f, -0.16f, 0.3f);
+            beam.transform.localRotation = Quaternion.Euler(1.5f, 2f, 0f); // 略微往准星方向收
+            beam.type = LightType.Spot;
+            beam.spotAngle = 56f;
+            beam.innerSpotAngle = 24f;
+            beam.range = 32f;
+            beam.intensity = 45f;
+            beam.color = new Color(1f, 0.92f, 0.78f);
+            beam.shadows = LightShadows.Soft;
+            beam.shadowNearPlane = 0.25f;
+            beam.renderMode = LightRenderMode.ForcePixel;
+            beam.cullingMask = ~(1 << weaponLayer); // 不照手里的模型（光源就在它旁边，会照成一片白）
+            beam.enabled = false;
+
+            var view = FlashlightModel(cam.transform, "FlashlightView", 0.13f);
+            view.transform.localPosition = new Vector3(-0.2f, -0.19f, 0.42f);
+            view.transform.localRotation = Quaternion.Euler(3f, 4f, -6f);
+            FPSSceneBuilder.SetLayerRecursive(view, weaponLayer);
+            view.SetActive(false);
+
+            var fl = player.AddComponent<Flashlight>();
+            fl.inventory = player.GetComponent<PlayerInventory>();
+            fl.flashlightItem = Item("flashlight");
+            fl.batteryItem = Item("battery");
+            fl.beam = beam;
+            fl.viewModel = view;
+            return fl;
+        }
+
+        static GameObject BatteryProp(Transform parent, Vector3 pos, float yaw, string name)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent);
+            go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            Object.DestroyImmediate(body.GetComponent<Collider>());
+            body.name = "Cell";
+            body.transform.SetParent(go.transform, false);
+            body.transform.localPosition = new Vector3(0, 0.017f, 0);
+            body.transform.localRotation = Quaternion.Euler(0, 0, 90f);
+            body.transform.localScale = new Vector3(0.033f, 0.03f, 0.033f);
+            body.GetComponent<Renderer>().sharedMaterial = FPSSceneBuilder.Painted("BatteryCell", new Color(0.12f, 0.3f, 0.18f), 0.2f, 0.45f);
+            return go;
+        }
+
         public static void PlacePickups(Terrain terrain, Vector3 spawn)
         {
             EnsureAssets();
@@ -344,6 +451,10 @@ namespace Rishi.Builders
                 ammoBox.transform.SetPositionAndRotation(ap, Quaternion.Euler(0, Random.Range(0f, 360f), 0));
                 FPSSceneBuilder.Part("Box", ammoBox.transform, new Vector3(0, 0.05f, 0), new Vector3(0.2f, 0.1f, 0.13f), FPSSceneBuilder.Painted("AmmoBox", new Color(0.3f, 0.33f, 0.22f), 0.3f, 0.3f), false);
                 MakePickup(ammoBox, Item("ammo_9mm"), 12, "拾取", new Vector3(0.3f, 0.2f, 0.25f));
+
+                // 一节电池滚在弹药盒旁边
+                var bp1 = IslandStoryBuilder.Ground(terrain, wreck.transform.position + toSpawn * 6.2f - side * 1.3f);
+                MakePickup(BatteryProp(root, bp1, Random.Range(0f, 360f), "BatteryWreck"), Item("battery"), 1, "捡起", new Vector3(0.12f, 0.08f, 0.12f));
             }
 
             if (camp != null)
@@ -361,6 +472,22 @@ namespace Rishi.Builders
                 for (int i = 0; i < 4; i++)
                     MeshObject("Rod" + i, bundle.transform, Rod("SpearRod", 0.82f, 0.0035f, 6, 0.05f), Steel, new Vector3((i - 1.5f) * 0.012f, 0.004f + (i % 2) * 0.006f, -0.43f), Quaternion.identity);
                 MakePickup(bundle, Item("spear"), 5, "拾取", new Vector3(0.15f, 0.1f, 0.95f));
+
+                // 父亲的手电筒和两节电池，放在营地的地上
+                var fp = IslandStoryBuilder.Ground(terrain, camp.transform.TransformPoint(new Vector3(-1.4f, 0, 1.1f)));
+                var torch = FlashlightModel(root, "FlashlightPickup", 0.24f);
+                torch.transform.SetPositionAndRotation(fp + Vector3.up * 0.045f, Quaternion.Euler(0, camp.transform.eulerAngles.y + 35f, 0));
+                MakePickup(torch, Item("flashlight"), 1, "拾取", new Vector3(0.12f, 0.12f, 0.3f));
+                var cp = IslandStoryBuilder.Ground(terrain, camp.transform.TransformPoint(new Vector3(-1.1f, 0, 1.3f)));
+                MakePickup(BatteryProp(root, cp, camp.transform.eulerAngles.y + 80f, "BatteryCamp"), Item("battery"), 2, "捡起", new Vector3(0.14f, 0.08f, 0.14f));
+            }
+
+            // 神殿台阶前也有两节（父亲先到过这里）
+            var ruin = GameObject.Find("SunTemple");
+            if (ruin != null)
+            {
+                var rp = IslandStoryBuilder.Ground(terrain, ruin.transform.TransformPoint(new Vector3(2.2f, 0, 12f)));
+                MakePickup(BatteryProp(root, rp, Random.Range(0f, 360f), "BatteryTemple"), Item("battery"), 2, "捡起", new Vector3(0.14f, 0.08f, 0.14f));
             }
 
             // 椰子：出生点附近的干沙滩上
