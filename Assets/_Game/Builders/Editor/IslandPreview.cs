@@ -296,12 +296,16 @@ namespace Rishi.Builders
         {
             var wc = cam.GetComponent<WeaponController>();
             if (wc == null) return;
+            if (wc.idleArms != null) wc.idleArms.SetActive(false);
             for (int i = 0; i < wc.slots.Count; i++)
             {
                 for (int k = 0; k < wc.slots.Count; k++) wc.slots[k].viewModel.SetActive(k == i);
                 Shot(cam, player, root, cycle, ocean, spawn, yaw + 40f, 4f, 10f, $"23_weapon_{wc.slots[i].def.id}");
             }
-            for (int k = 0; k < wc.slots.Count; k++) wc.slots[k].viewModel.SetActive(k == 0);
+            // 开局空手：两只手在画面下方
+            for (int k = 0; k < wc.slots.Count; k++) wc.slots[k].viewModel.SetActive(false);
+            if (wc.idleArms != null) wc.idleArms.SetActive(true);
+            Shot(cam, player, root, cycle, ocean, spawn, yaw + 40f, 4f, 10f, "23_weapon_unarmed");
             var machete = GameObject.Find("MachetePickup");
             if (machete != null)
             {
@@ -356,9 +360,12 @@ namespace Rishi.Builders
             float yaw = spawnYaw + 150f;
             fl.PreviewOn(false);
             Shot(cam, player, root, cycle, ocean, spawn, yaw, 16f, 22.5f, "35_night_dark");
+            var wc = cam.GetComponent<WeaponController>();
+            if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(false); // 开手电时左手拿手电（游戏里 WeaponController 自动切换）
             fl.PreviewOn(true);
             Shot(cam, player, root, cycle, ocean, spawn, yaw, 16f, 22.5f, "36_night_flashlight");
             fl.PreviewOn(false);
+            if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
             var pickup = GameObject.Find("FlashlightPickup");
             if (pickup != null)
             {

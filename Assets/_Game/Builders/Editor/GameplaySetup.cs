@@ -293,12 +293,28 @@ namespace Rishi.Builders
                 new WeaponController.Slot { def = Weapon("pistol"), viewModel = pistol, muzzle = pistolMuzzle },
             };
 
+            // 手枪：右手握把，左手从下面托住
+            var pb = LocalBounds(pistol, holder);
+            var pgrip = new Vector3(pb.center.x, pb.min.y + pb.size.y * 0.3f, pb.min.z + pb.size.z * 0.22f);
+            ArmBuilder.Arm(pistol.transform, "RightArm", pistol.transform.InverseTransformPoint(holder.TransformPoint(pgrip + new Vector3(0.012f, -0.03f, -0.035f))),
+                           pistol.transform.InverseTransformDirection(holder.TransformDirection(new Vector3(0.35f, -0.55f, -0.76f))),
+                           pistol.transform.InverseTransformDirection(holder.TransformDirection(new Vector3(0.8f, 0.55f, 0f))), 1f, false, WeaponLayer);
+            slots[0].leftArm = ArmBuilder.Arm(pistol.transform, "LeftArm", pistol.transform.InverseTransformPoint(holder.TransformPoint(pgrip + new Vector3(-0.038f, -0.045f, -0.015f))),
+                           pistol.transform.InverseTransformDirection(holder.TransformDirection(new Vector3(-0.5f, -0.55f, -0.67f))),
+                           pistol.transform.InverseTransformDirection(holder.TransformDirection(new Vector3(-0.85f, -0.2f, 0.1f))), 0.85f, true, WeaponLayer);
+
             // 砍刀：握在右手，刀尖朝前上方
             var machetePivot = new GameObject("MacheteVM").transform;
             machetePivot.SetParent(holder, false);
             machetePivot.localPosition = new Vector3(0.05f, -0.05f, 0.02f);
             machetePivot.localRotation = Quaternion.Euler(-55f, 50f, 0f);
-            Machete(machetePivot);
+            var machete = Machete(machetePivot);
+            var mb = LocalBounds(machete, holder);
+            // 刀柄是离摄像机最近的一端
+            var mgrip = new Vector3(machetePivot.localPosition.x, machetePivot.localPosition.y, mb.min.z + 0.05f);
+            ArmBuilder.Arm(machetePivot, "RightArm", machetePivot.InverseTransformPoint(holder.TransformPoint(mgrip + new Vector3(0.015f, -0.035f, -0.03f))),
+                           machetePivot.InverseTransformDirection(holder.TransformDirection(new Vector3(0.3f, -0.6f, -0.74f))),
+                           machetePivot.InverseTransformDirection(holder.TransformDirection(new Vector3(0.85f, 0.5f, 0f))), 1f, false, WeaponLayer);
             slots.Add(new WeaponController.Slot { def = Weapon("machete"), viewModel = machetePivot.gameObject });
 
             // 鱼枪：腰射姿态，枪身大部分伸出画面
@@ -306,8 +322,16 @@ namespace Rishi.Builders
             gunPivot.SetParent(holder, false);
             gunPivot.localPosition = new Vector3(-0.03f, -0.01f, -0.06f);
             gunPivot.localRotation = Quaternion.Euler(0f, 0f, 0f);
-            Speargun(gunPivot, out var spearMuzzle);
-            slots.Add(new WeaponController.Slot { def = Weapon("speargun"), viewModel = gunPivot.gameObject, muzzle = spearMuzzle });
+            var speargun = Speargun(gunPivot, out var spearMuzzle);
+            var sb = LocalBounds(speargun, holder);
+            var sgrip = new Vector3(sb.center.x, sb.min.y + 0.02f, Mathf.Max(sb.min.z, -0.05f) + 0.08f);
+            ArmBuilder.Arm(gunPivot, "RightArm", gunPivot.InverseTransformPoint(holder.TransformPoint(sgrip + new Vector3(0.012f, -0.02f, -0.03f))),
+                           gunPivot.InverseTransformDirection(holder.TransformDirection(new Vector3(0.35f, -0.55f, -0.76f))),
+                           gunPivot.InverseTransformDirection(holder.TransformDirection(new Vector3(0.8f, 0.55f, 0f))), 1f, false, WeaponLayer);
+            var sleft = ArmBuilder.Arm(gunPivot, "LeftArm", gunPivot.InverseTransformPoint(holder.TransformPoint(new Vector3(sb.center.x - 0.03f, sb.min.y + 0.005f, sgrip.z + 0.2f))),
+                           gunPivot.InverseTransformDirection(holder.TransformDirection(new Vector3(-0.45f, -0.5f, -0.74f))),
+                           gunPivot.InverseTransformDirection(holder.TransformDirection(new Vector3(-0.7f, -0.5f, 0f))), 0.8f, true, WeaponLayer);
+            slots.Add(new WeaponController.Slot { def = Weapon("speargun"), viewModel = gunPivot.gameObject, muzzle = spearMuzzle, leftArm = sleft });
 
             foreach (var s in slots)
                 foreach (var r in s.viewModel.GetComponentsInChildren<Renderer>())
@@ -316,6 +340,20 @@ namespace Rishi.Builders
                     r.gameObject.layer = WeaponLayer;
                 }
             return slots;
+        }
+
+        /// <summary>物体所有渲染器的包围盒，换算到 space 的局部坐标。</summary>
+        static Bounds LocalBounds(GameObject go, Transform space)
+        {
+            var rs = go.GetComponentsInChildren<Renderer>();
+            var b = new Bounds(space.InverseTransformPoint(rs[0].bounds.center), Vector3.zero);
+            foreach (var r in rs)
+            {
+                var wb = r.bounds;
+                for (int i = 0; i < 8; i++)
+                    b.Encapsulate(space.InverseTransformPoint(wb.center + Vector3.Scale(wb.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1))));
+            }
+            return b;
         }
 
         // ================= 场景里的拾取物 =================
@@ -399,6 +437,8 @@ namespace Rishi.Builders
             var view = FlashlightModel(cam.transform, "FlashlightView", 0.13f);
             view.transform.localPosition = new Vector3(-0.2f, -0.19f, 0.42f);
             view.transform.localRotation = Quaternion.Euler(3f, 4f, -6f);
+            // 左手握着手电（随手电一起显示）
+            ArmBuilder.Arm(view.transform, "LeftArm", new Vector3(0.012f, -0.055f, -0.03f), new Vector3(-0.3f, -0.5f, -0.81f), new Vector3(-0.8f, 0.55f, 0f), 1f, true, weaponLayer);
             FPSSceneBuilder.SetLayerRecursive(view, weaponLayer);
             view.SetActive(false);
 

@@ -11,8 +11,9 @@ using Rishi.Player;
 namespace Rishi.Weapons
 {
     /// <summary>
-    /// 武器控制：1/2/3 或滚轮切换，左键攻击，R 换弹。射线枪、近战、投射物三种武器共用一套流程。
-    /// 背包里有对应物品才能装备，备用弹药从背包里扣。挂在主摄像机上，枪模在 WeaponHolder 下（武器层）。
+    /// 武器控制：1/2/3 或滚轮切换，再按一次当前武器的数字键收起（空手），左键攻击，R 换弹。
+    /// 射线枪、近战、投射物三种武器共用一套流程。开局空手，武器放在背包里，捡到新武器只提示按键、不自动拿出。
+    /// 背包里有对应物品才能装备，备用弹药从背包里扣。挂在主摄像机上，枪模和手臂在 WeaponHolder 下（武器层）。
     /// </summary>
     public class WeaponController : MonoBehaviour
     {
@@ -22,6 +23,8 @@ namespace Rishi.Weapons
             public WeaponDef def;
             public GameObject viewModel;
             public Transform muzzle;
+            [Tooltip("扶枪的左手：打开手电筒时藏起来（左手拿手电）")]
+            public GameObject leftArm;
             [NonSerialized] public int loaded = -1;
         }
 
@@ -33,6 +36,10 @@ namespace Rishi.Weapons
         [Tooltip("投射物（鱼枪矛）的模型")]
         public GameObject projectilePrefab;
         public float switchTime = 0.32f;
+        [Tooltip("空手时显示的两只手")]
+        public GameObject idleArms;
+        [Tooltip("空手时的左手：打开手电筒时藏起来")]
+        public GameObject idleLeftArm;
 
         public Slot Current => index >= 0 && index < slots.Count ? slots[index] : null;
         public int CurrentIndex => index;
@@ -65,6 +72,7 @@ namespace Rishi.Weapons
                 if (s.viewModel != null) s.viewModel.SetActive(false);
                 s.loaded = s.def != null ? s.def.magazineSize : 0;
             }
+            if (idleArms != null) idleArms.SetActive(true);
         }
 
         void Start()
@@ -81,13 +89,21 @@ namespace Rishi.Weapons
         public bool Owns(int i) => i >= 0 && i < slots.Count && slots[i].def != null &&
                                    (slots[i].def.item == null || (PlayerInventory.Instance != null && PlayerInventory.Instance.Has(slots[i].def.item)));
 
-        /// <summary>背包变化：当前武器被丢掉就收起，空手时捡到武器自动拿出来。</summary>
+        readonly HashSet<int> owned = new HashSet<int>();
+        bool ownedKnown;
+
+        /// <summary>背包变化：当前武器被丢掉就收起；捡到新武器只提示按键，不自动拿出来（开局的手枪也不提示）。</summary>
         void OnInventoryChanged()
         {
             if (index >= 0 && !Owns(index)) Equip(-1);
-            if (index < 0)
-                for (int i = 0; i < slots.Count; i++)
-                    if (Owns(i)) { Equip(i); break; }
+            for (int i = 0; i < slots.Count; i++)
+            {
+                bool has = Owns(i);
+                if (has && owned.Add(i) && ownedKnown && slots[i].def != null)
+                    GameSignals.Toast($"按 {i + 1} 拿出{slots[i].def.displayName}");
+                if (!has) owned.Remove(i);
+            }
+            ownedKnown = true;
         }
 
         /// <summary>切换到第 i 把武器（-1 = 空手）。</summary>
@@ -110,6 +126,7 @@ namespace Rishi.Weapons
             }
             if (Current?.viewModel != null) Current.viewModel.SetActive(false);
             index = i;
+            if (idleArms != null) idleArms.SetActive(index < 0);
             if (Current != null)
             {
                 if (Current.viewModel != null) Current.viewModel.SetActive(true);
@@ -131,6 +148,10 @@ namespace Rishi.Weapons
             SpreadNow = Mathf.Lerp(SpreadNow, baseSpread + moveSpread, 10f * Time.deltaTime);
 
             if (weaponFeel != null) weaponFeel.Swimming = GameSignals.Swimming;
+            // 手电筒亮着时左手拿手电，扶枪 / 空手的左手藏起来
+            bool leftBusy = GameSignals.FlashlightOn;
+            if (Current?.leftArm != null && Current.leftArm.activeSelf == leftBusy) Current.leftArm.SetActive(!leftBusy);
+            if (idleLeftArm != null && idleLeftArm.activeSelf == leftBusy) idleLeftArm.SetActive(!leftBusy);
             if (GameSignals.GameplayBlocked || (player != null && !player.IsCursorLocked)) return;
             HandleSwitchInput(keyboard, mouse);
             if (Current == null || IsReloading || IsSwitching || (player != null && player.IsSprinting)) return;
@@ -178,9 +199,8 @@ namespace Rishi.Weapons
 
         void HandleSwitchInput(Keyboard keyboard, Mouse mouse)
         {
-            if (keyboard.digit1Key.wasPressedThisFrame) Equip(0);
-            else if (keyboard.digit2Key.wasPressedThisFrame) Equip(1);
-            else if (keyboard.digit3Key.wasPressedThisFrame) Equip(2);
+            int pressed = keyboard.digit1Key.wasPressedThisFrame ? 0 : keyboard.digit2Key.wasPressedThisFrame ? 1 : keyboard.digit3Key.wasPressedThisFrame ? 2 : -1;
+            if (pressed >= 0) Equip(pressed == index ? -1 : pressed); // 再按一次收起
             float scroll = mouse.scroll.ReadValue().y;
             if (Mathf.Abs(scroll) > 0.1f && slots.Count > 0)
             {

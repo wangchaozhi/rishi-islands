@@ -223,7 +223,7 @@ namespace Rishi.Builders
             var feel = holder.AddComponent<WeaponFeel>();
             feel.player = controller;
 
-            // 背包：开局带着手枪和一个备用弹匣
+            // 背包：开局带着手枪和一个备用弹匣（放在背包里，开局空手，按 1 拿出来）
             var inventory = player.AddComponent<PlayerInventory>();
             inventory.startItems.Add(new PlayerInventory.Stack { item = GameplaySetup.Item("pistol"), count = 1 });
             inventory.startItems.Add(new PlayerInventory.Stack { item = GameplaySetup.Item("ammo_9mm"), count = 12 });
@@ -234,8 +234,14 @@ namespace Rishi.Builders
             weapons.muzzleLight = flash;
             weapons.hitMask = ~(1 << WeaponLayer);
             weapons.projectilePrefab = GameplaySetup.SpearPrefab();
+            // 空手时的两只手（画面左右下角，放松半握）
+            var idle = new GameObject("IdleArms");
+            idle.transform.SetParent(holder.transform, false);
+            ArmBuilder.Arm(idle.transform, "RightHand", new Vector3(0.07f, -0.075f, 0.1f), new Vector3(0.3f, -0.42f, -0.86f), new Vector3(0.45f, 0.85f, 0.2f), 0.6f, false, WeaponLayer);
+            weapons.idleLeftArm = ArmBuilder.Arm(idle.transform, "LeftHand", new Vector3(-0.29f, -0.075f, 0.1f), new Vector3(-0.3f, -0.42f, -0.86f), new Vector3(-0.45f, 0.85f, 0.2f), 0.6f, true, WeaponLayer);
+            weapons.idleArms = idle;
             SetLayerRecursive(holder, WeaponLayer);
-            for (int i = 1; i < weapons.slots.Count; i++) weapons.slots[i].viewModel.SetActive(false); // 默认拿手枪
+            foreach (var s in weapons.slots) s.viewModel.SetActive(false); // 开局空手
 
             // 游泳：氧气、气泡、水下画面和声音
             var breath = player.AddComponent<Breath>();
