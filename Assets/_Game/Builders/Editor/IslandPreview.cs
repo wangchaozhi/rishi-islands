@@ -28,6 +28,17 @@ namespace Rishi.Builders
             Capture();
             CutscenePreview.Capture(IslandBuilder.ScenePath, "CG02_WakeUp", new[] { 1.5f, 5f, 8.8f, 12f, 17.3f, 21f, 24.9f });
             CutscenePreview.Capture(IslandBuilder.ScenePath, "CG01_Storm", new[] { 2.5f, 7f, 11.2f, 13.5f, 16.6f, 18.2f });
+            CutscenePreview.Capture(IslandBuilder.ScenePath, "CG03_StoneDoor", new[] { 1f, 3.5f, 6f });
+            CutscenePreview.Capture(IslandBuilder.ScenePath, "CG04_FirstHeart", new[] { 1f, 3f });
+            CutscenePreview.Capture(IslandBuilder.ScenePath, "CG05_Nightfall", new[] { 1.5f, 6f, 9.5f });
+        }
+
+        /// <summary>只截 CG03 / CG04 / CG05 的画面（改了神殿过场后快速检查用）。</summary>
+        public static void CaptureTempleCutscenes()
+        {
+            CutscenePreview.Capture(IslandBuilder.ScenePath, "CG03_StoneDoor", new[] { 1f, 3.5f, 6f });
+            CutscenePreview.Capture(IslandBuilder.ScenePath, "CG04_FirstHeart", new[] { 1f, 3f });
+            CutscenePreview.Capture(IslandBuilder.ScenePath, "CG05_Nightfall", new[] { 1.5f, 6f, 9.5f });
         }
 
         [MenuItem("Tools/Island/渲染预览截图")]

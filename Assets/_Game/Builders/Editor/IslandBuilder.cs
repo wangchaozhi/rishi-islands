@@ -256,6 +256,7 @@ namespace Rishi.Builders
             // 开场 CG：CG01 风暴 → CG02 醒来
             var wakeUp = CutsceneBuilder.BuildWakeUp(player, wreck, monologue, playOnStart: false);
             CutsceneBuilder.BuildStorm(cycle, GameObject.Find("Ocean").GetComponent<Renderer>(), wakeUp);
+            CutsceneBuilder.BuildTempleCutscenes(Object.FindFirstObjectByType<PillarPuzzle>(), Object.FindFirstObjectByType<TreasureChest>(), cycle); // CG03 / CG04 / CG05
 
             var fx = new GameObject("FX").AddComponent<FXManager>();
             fx.additiveMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Generated/Materials/FX_Soft.mat");

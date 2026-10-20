@@ -188,6 +188,65 @@ namespace Rishi.Builders
             return cp;
         }
 
+        // ================= CG03 石门开启 · CG04 第一块心 · CG05 入夜 =================
+
+        /// <summary>神殿里的三段过场：解开石柱机关时 CG03，打开石匣时 CG04，太阳开始坠落时 CG05（入夜加速到 11 秒）。</summary>
+        public static void BuildTempleCutscenes(PillarPuzzle puzzle, TreasureChest chest, DayNightCycle cycle)
+        {
+            var temple = puzzle.transform.root.Find("SunTemple") ?? GameObject.Find("SunTemple").transform;
+            Vector3 fwd = Vector3.ProjectOnPlane(temple.forward, Vector3.up).normalized; // 神殿正面朝外
+            Vector3 right = Vector3.Cross(Vector3.up, fwd);
+            float Yaw(Vector3 d) => Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg;
+            float Pitch(Vector3 d) => -Mathf.Atan2(d.y, new Vector2(d.x, d.z).magnitude) * Mathf.Rad2Deg;
+            Vector3 Look(Vector3 from, Vector3 to) { var d = to - from; return new Vector3(Pitch(d), Yaw(d), 0); }
+
+            // ---- CG03 石门开启：石柱的符文亮起 → 正面看石门在轰鸣中沉入地下 ----
+            var door = puzzle.door.position;
+            var pillar = puzzle.pillars != null && puzzle.pillars.Length > 0 ? puzzle.pillars[0].transform.position : door + fwd * 4f;
+            var p1a = pillar + fwd * 2.2f + right * 1.4f + Vector3.up * 1.1f;
+            var p1b = pillar + fwd * 1.6f + right * 0.9f + Vector3.up * 1.3f;
+            var d2a = door + fwd * 11f + Vector3.up * 1.4f;
+            var d2b = door + fwd * 7.5f + Vector3.up * 1.6f;
+            var cg03 = Create("CG03_StoneDoor", new List<Shot>
+            {
+                new Shot { start = 0f, duration = 2.2f, fromPos = p1a, toPos = p1b, fromEuler = Look(p1a, pillar + Vector3.up * 1.2f), toEuler = Look(p1b, pillar + Vector3.up * 1.4f), fromFov = 45f, toFov = 40f },
+                new Shot { start = 2.2f, duration = 4.8f, fromPos = d2a, toPos = d2b, fromEuler = Look(d2a, door + Vector3.up * 1.5f), toEuler = Look(d2b, door + Vector3.up * 1.2f), fromFov = 50f, toFov = 46f },
+            }, new List<(float, float, string)>(), new List<(float, float, float, float)> { (0f, 0.6f, 1f, 0f), (6.4f, 0.6f, 0f, 1f) }, false);
+            UnityEventTools.AddPersistentListener(puzzle.onSolved, cg03.Play);
+
+            // ---- CG04 第一块心：俯看石匣打开 → 碎片升起，镜头推近 ----
+            // 石匣模型的根节点不在箱子中心，按渲染包围盒取箱子的位置；碎片会从原位升起 0.6 米
+            var cr = chest.GetComponentsInChildren<Renderer>();
+            var cb = cr[0].bounds;
+            foreach (var r in cr) cb.Encapsulate(r.bounds);
+            var box = cb.center;
+            var heart = (chest.fragment != null ? chest.fragment.position : new Vector3(box.x, cb.max.y, box.z)) + Vector3.up * 0.6f;
+            var c1a = box + fwd * 1.6f + right * 0.7f + Vector3.up * 1.3f;
+            var c1b = box + fwd * 1.2f + right * 0.45f + Vector3.up * 1.05f;
+            var c2a = heart + fwd * 1.7f + Vector3.up * 0.2f; // 拉开一点：画面下方是打开的石匣，上方是升起的碎片
+            var c2b = heart + fwd * 1.15f + Vector3.up * 0.12f;
+            var aim = heart - Vector3.up * 0.25f;
+            var cg04 = Create("CG04_FirstHeart", new List<Shot>
+            {
+                new Shot { start = 0f, duration = 1.8f, fromPos = c1a, toPos = c1b, fromEuler = Look(c1a, box + Vector3.up * 0.3f), toEuler = Look(c1b, box + Vector3.up * 0.4f), fromFov = 45f, toFov = 42f },
+                new Shot { start = 1.8f, duration = 2.6f, fromPos = c2a, toPos = c2b, fromEuler = Look(c2a, aim), toEuler = Look(c2b, aim), fromFov = 42f, toFov = 36f },
+            }, new List<(float, float, string)> { (2.2f, 2.2f, "太阳之心的碎片……它是温的。") },
+               new List<(float, float, float, float)> { (0f, 0.4f, 1f, 0f), (4.0f, 0.4f, 0f, 1f) }, false);
+            UnityEventTools.AddPersistentListener(chest.onOpened, cg04.Play);
+
+            // ---- CG05 入夜：神殿上空，太阳以不自然的速度坠进林冠，天色迅速暗下去 ----
+            float sunsetYaw = cycle != null && cycle.config != null ? cycle.config.sunAzimuth : 35f; // 太阳在这个方位落下
+            var s1a = temple.position - Vector3.ProjectOnPlane(Quaternion.Euler(0, sunsetYaw, 0) * Vector3.forward, Vector3.up) * 6f + Vector3.up * 20f;
+            var s1b = s1a + Vector3.up * 6f;
+            var cg05 = Create("CG05_Nightfall", new List<Shot>
+            {
+                new Shot { start = 0f, duration = 11f, fromPos = s1a, toPos = s1b, fromEuler = new Vector3(-6f, sunsetYaw, 0), toEuler = new Vector3(2f, sunsetYaw + 4f, 0), fromFov = 58f, toFov = 52f },
+            }, new List<(float, float, string)> { (2.5f, 3.5f, "……太阳在往下坠？"), (7f, 3.2f, "不对。现在才是下午。") },
+               new List<(float, float, float, float)> { (0f, 0.6f, 1f, 0f), (10.2f, 0.8f, 0f, 1f) }, false);
+            UnityEventTools.AddPersistentListener(chest.onNightfall, cg05.Play);
+            chest.nightfallSeconds = 11f;
+        }
+
         // ================= CG01 · 风暴 =================
 
         /// <summary>开场：夜里的海上风暴，闪电照亮远处的岛，撞上暗礁，落水黑屏，然后接 CG02。</summary>

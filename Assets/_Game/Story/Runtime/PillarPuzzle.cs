@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using Rishi.Audio;
 using Rishi.Core;
 using Rishi.World;
@@ -20,6 +21,8 @@ namespace Rishi.Story
         public Light revealLight;
         public int objectiveStage = 4;
         public string objectiveText = "进入神殿，打开石匣";
+        [Tooltip("机关解开时触发（接 CG03 石门开启的过场）")]
+        public UnityEvent onSolved = new UnityEvent();
 
         public bool Solved { get; private set; }
 
@@ -35,6 +38,7 @@ namespace Rishi.Story
 
         IEnumerator OpenSequence()
         {
+            onSolved.Invoke();
             GameState.Instance?.Toast("石柱发出低沉的轰鸣……");
             AudioManager.Play("puzzle_solved", transform.position);
             var block = new MaterialPropertyBlock();

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 using Rishi.Audio;
 using Rishi.Core;
 using Rishi.World;
@@ -16,6 +17,12 @@ namespace Rishi.Story
         public NoteData note = new NoteData();
         public int objectiveStage = 5;
         public string objectiveText = "线索：「海水退去之处」。修好沉船的小艇，前往下一座岛（开发中）";
+        [Tooltip("打开时触发（接 CG04 第一块心的过场）")]
+        public UnityEvent onOpened = new UnityEvent();
+        [Tooltip("太阳开始坠落时触发（接 CG05 入夜的过场）")]
+        public UnityEvent onNightfall = new UnityEvent();
+        [Tooltip("太阳从现在坠到 20:20 用的秒数")]
+        public float nightfallSeconds = 25f;
 
         bool opened;
 
@@ -34,6 +41,7 @@ namespace Rishi.Story
             Quaternion lidEnd = lidStart * Quaternion.Euler(lidOpenEuler);
             // 用世界坐标移动碎片：箱子模型根节点带缩放和旋转
             Vector3 fragStart = fragment != null ? fragment.position : Vector3.zero;
+            onOpened.Invoke();
             if (fragment != null) fragment.gameObject.SetActive(true);
             AudioManager.Play("chest_open", transform.position);
 
@@ -63,11 +71,13 @@ namespace Rishi.Story
                 if (!string.IsNullOrEmpty(note.title)) gs.AddNote(note);
                 gs.SetObjective(objectiveStage, objectiveText);
             }
-            // 拿走碎片的代价：太阳以不自然的速度落下（之后会做成 CG05 入夜）
+            // 拿走碎片的代价：太阳以不自然的速度落下（CG05 入夜）
+            while (GameSignals.CutsceneActive) yield return null; // 等 CG04 播完
             var cycle = FindFirstObjectByType<DayNightCycle>();
             if (cycle != null && cycle.timeOfDay > 6f && cycle.timeOfDay < 18.5f)
             {
-                cycle.RushTo(20.3f, 25f);
+                cycle.RushTo(20.3f, nightfallSeconds);
+                onNightfall.Invoke();
                 gs?.Toast("……太阳在往下坠？");
             }
             if (fragment != null) fragment.gameObject.SetActive(false);
