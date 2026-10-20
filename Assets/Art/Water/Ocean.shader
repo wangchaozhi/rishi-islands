@@ -1,4 +1,5 @@
-// 写实海面（URP）：Gerstner 波浪位移 + 深度吸收 + 折射 + 天空反射 + 太阳高光 + 岸边/浪尖泡沫。
+// 写实海面（URP）：Gerstner 波浪位移 + 深度吸收 + 折射 + 天空反射 + 太阳高光 + 岸边/浪尖泡沫
+// + 岸边涌浪（水位周期性漫上沙滩）与推岸的白沫浪线 + 浅水海底的焦散光斑。
 // 需要 URP 资产开启 Depth Texture 和 Opaque Texture。
 Shader "Island/Ocean"
 {
@@ -36,6 +37,18 @@ Shader "Island/Ocean"
         _IslandRect ("Island Rect (minX, minZ, sizeX, sizeZ)", Vector) = (-300, -300, 600, 600)
         _IslandHeightRange ("Height Range (min, size)", Vector) = (-20, 80, 0, 0)
         _ShoreWaveDepth ("Waves Fade Depth", Float) = 7
+
+        [Header(Surf  waves rolling onto the beach)]
+        _SurfDepth ("Surf Zone Depth (m)", Float) = 4
+        _SurfPeriod ("Surf Period (s)", Float) = 7
+        _SurfSpacing ("Surf Band Spacing (m of depth)", Float) = 1.6
+        _SurfFoam ("Surf Foam", Range(0, 1.5)) = 0.9
+        _SurgeHeight ("Surge Height (m)", Float) = 0.14
+
+        [Header(Caustics on the shallow seabed)]
+        _CausticStrength ("Caustic Strength", Range(0, 4)) = 1.6
+        _CausticScale ("Caustic Scale (cells per m)", Float) = 0.45
+        _CausticDepth ("Caustic Fade Depth (m)", Float) = 9
     }
 
     SubShader
@@ -79,6 +92,8 @@ Shader "Island/Ocean"
                 float4 _IslandHeight_ST;
                 float4 _IslandRect, _IslandHeightRange;
                 float _ShoreWaveDepth;
+                float _SurfDepth, _SurfPeriod, _SurfSpacing, _SurfFoam, _SurgeHeight;
+                float _CausticStrength, _CausticScale, _CausticDepth;
                 float4 _NormalMap_ST;
             CBUFFER_END
 
@@ -94,6 +109,7 @@ Shader "Island/Ocean"
                 float3 normalWS   : TEXCOORD1;
                 float  crest      : TEXCOORD2;
                 float  fogFactor  : TEXCOORD3;
+                float  seabed     : TEXCOORD4; // 高度图里的水深（米）
             };
 
             float3 Gerstner(float4 wave, float3 p, float fade, inout float3 tangent, inout float3 binormal)
@@ -118,6 +134,9 @@ Shader "Island/Ocean"
                 return -(_IslandHeightRange.x + h * _IslandHeightRange.y); // 海平面 y=0 下方的水深
             }
 
+            // 涌浪相位：一组浪线从 _SurfDepth 深处推向岸边，周期 _SurfPeriod 秒；水深越浅相位越靠后
+            float SurfPhase(float depth) { return _Time.y / _SurfPeriod + depth / _SurfSpacing; }
+
             Varyings vert(Attributes v)
             {
                 Varyings o;
@@ -135,9 +154,13 @@ Shader "Island/Ocean"
                 offs += Gerstner(_WaveB, grid, shore * saturate(1 - dist / (_WaveB.w * 20)), tangent, binormal);
                 offs += Gerstner(_WaveC, grid, shore * saturate(1 - dist / (_WaveC.w * 16)), tangent, binormal);
                 offs += Gerstner(_WaveD, grid, shore * saturate(1 - dist / (_WaveD.w * 12)), tangent, binormal);
+                // 岸边涌浪：浪线到岸时水位抬高、退去时回落，水线在沙滩上来回推移
+                float surfZone = saturate(1 - depth / _SurfDepth) * step(-0.5, depth);
+                offs.y += _SurgeHeight * surfZone * sin(TWO_PI * (SurfPhase(max(depth, 0)) - 0.7)); // 浪线前沿（相位 0.95）到达时水位最高
                 p += offs;
 
                 o.positionWS = p;
+                o.seabed = depth;
                 o.normalWS = normalize(cross(binormal, tangent));
                 o.crest = offs.y;
                 o.positionCS = TransformWorldToHClip(p);
@@ -151,6 +174,36 @@ Shader "Island/Ocean"
                 float2 i = floor(p), f = frac(p);
                 float2 u = f * f * (3 - 2 * f);
                 return lerp(lerp(Hash(i), Hash(i + float2(1, 0)), u.x), lerp(Hash(i + float2(0, 1)), Hash(i + 1), u.x), u.y);
+            }
+
+            float2 Hash2(float2 p)
+            {
+                p = float2(dot(p, float2(127.1, 311.7)), dot(p, float2(269.5, 183.3)));
+                return frac(sin(p) * 43758.5453);
+            }
+
+            // 焦散：动态 Voronoi 的 F2-F1，在细胞边界处是一条条亮线
+            float CausticLayer(float2 p, float t)
+            {
+                float2 i = floor(p), f = frac(p);
+                float d1 = 8, d2 = 8;
+                [unroll] for (int y = -1; y <= 1; y++)
+                [unroll] for (int x = -1; x <= 1; x++)
+                {
+                    float2 g = float2(x, y);
+                    float2 o = 0.5 + 0.42 * sin(t + TWO_PI * Hash2(i + g));
+                    float d = length(g + o - f);
+                    if (d < d1) { d2 = d1; d1 = d; } else if (d < d2) d2 = d;
+                }
+                return 1 - smoothstep(0.0, 0.14, d2 - d1);
+            }
+
+            float Caustics(float2 p)
+            {
+                float t = _Time.y * 0.9;
+                float a = CausticLayer(p, t);
+                float b = CausticLayer(p * 1.37 + float2(3.1, 7.7), -t * 1.2);
+                return pow(saturate((a + b) * 0.62), 2.2);
             }
 
             float _IslandUnderwater; // UnderwaterFX 写入：摄像机在水下时为 1
@@ -223,6 +276,16 @@ Shader "Island/Ocean"
                 float3 transmit = exp(-_Absorption.xyz * pathLen);
                 float scatterAmt = 1 - exp(-_ScatterDensity * pathLen);
                 half3 scatter = _DeepColor.rgb * (ambient * 1.2 + lightCol * sunAmount * 0.35);
+                // 浅水海底的焦散：沿视线把折射处的场景深度还原成海底位置，沿阳光方向投影后叠加光斑（受阴影遮挡）
+                float3 bed = _WorldSpaceCameraPos + (posWS - _WorldSpaceCameraPos) * (refrEye / max(surfaceEye, 1e-3));
+                float bedDepth = -bed.y;
+                float causticFade = saturate(bedDepth * 2) * saturate(1 - bedDepth / _CausticDepth) * saturate(thickness * 3);
+                if (causticFade > 0.001 && sunAmount > 0.02)
+                {
+                    float2 cp = (bed.xz - mainLight.direction.xz / max(mainLight.direction.y, 0.2) * bed.y) * _CausticScale;
+                    float bedShadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(bed));
+                    sceneColor *= 1 + Caustics(cp) * _CausticStrength * causticFade * sunAmount * bedShadow * lightCol;
+                }
                 half3 underwater = sceneColor * transmit * _ShallowColor.rgb;
                 underwater = lerp(underwater, scatter, scatterAmt);
 
@@ -246,7 +309,13 @@ Shader "Island/Ocean"
                 float shoreFoam = saturate(1 - thickness / _ShoreFoamDistance);
                 shoreFoam *= step(0.35 + (1 - shoreFoam) * 0.5, foamNoise + shoreFoam * 0.5);
                 float crestFoam = saturate((i.crest - 0.9) * _CrestFoam) * step(0.55, foamNoise);
-                float foam = saturate(shoreFoam + crestFoam);
+                // 推岸的白沫浪线：浪线前沿是一道亮白的碎浪，身后拖着逐渐散开的泡沫
+                float surfZone = saturate(1 - i.seabed / _SurfDepth) * saturate(i.seabed * 1.5 + 0.3);
+                float band = frac(SurfPhase(max(i.seabed, 0)) + Noise(posWS.xz * 0.08) * 0.25);
+                float front = smoothstep(0.9, 0.97, band) * (1 - smoothstep(0.97, 1.0, band));
+                float trail = (1 - smoothstep(0.0, 0.22, band)) * 0.35;
+                float surfFoam = saturate((front + trail) * surfZone * _SurfFoam) * smoothstep(0.38, 0.62, foamNoise + front * 0.25);
+                float foam = saturate(shoreFoam + crestFoam + surfFoam);
                 half3 foamLit = _FoamColor.rgb * (ambient + lightCol * (0.4 + 0.6 * mainLight.shadowAttenuation) * sunAmount);
                 col = lerp(col, foamLit, foam * 0.9);
 

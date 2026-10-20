@@ -51,8 +51,21 @@ namespace Rishi.Builders
                 level[i] = Mathf.Max(level[i], 0.05f);
             }
 
+            // 白水：落差大的地方（瀑布、急滩）翻白，往下游约 6 米逐渐散开；写进顶点色 r 给着色器用
+            var white = new float[pts.Count];
+            int fall = -1;
+            float fallDrop = 0f;
+            for (int i = 1; i < pts.Count; i++)
+            {
+                float drop = level[i - 1] - level[i];
+                white[i] = Mathf.Max(Mathf.Clamp01((drop - 0.4f) / 0.8f), white[i - 1] * 0.7f);
+                if (drop > fallDrop) { fallDrop = drop; fall = i; }
+            }
+            for (int i = 1; i < pts.Count; i++) white[i - 1] = Mathf.Max(white[i - 1], Mathf.Clamp01((level[i - 1] - level[i] - 0.4f) / 0.8f)); // 瀑布顶的边缘也白
+
             var verts = new List<Vector3>();
             var uvs = new List<Vector2>();
+            var colors = new List<Color>();
             var tris = new List<int>();
             float dist = 0;
             float half = IslandRegions.RiverHalfWidth + 0.6f;
@@ -67,6 +80,7 @@ namespace Rishi.Builders
                     Vector2 p = pts[i] + side * Mathf.Lerp(-half, half, k);
                     verts.Add(new Vector3(p.x, level[i], p.y));
                     uvs.Add(new Vector2(k, dist));
+                    colors.Add(new Color(white[i], 0, 0, 1));
                 }
                 if (i > 0)
                 {
@@ -77,6 +91,7 @@ namespace Rishi.Builders
             var mesh = new Mesh { name = "River", indexFormat = IndexFormat.UInt32 };
             mesh.SetVertices(verts);
             mesh.SetUVs(0, uvs);
+            mesh.SetColors(colors);
             mesh.SetTriangles(tris, 0);
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
@@ -97,7 +112,81 @@ namespace Rishi.Builders
             var clip = AudioClip("amb_river");
             for (int i = 0; i < pts.Count; i += 15)
                 Loop(go.transform, new Vector3(pts[i].x, level[i] + 0.3f, pts[i].y), clip, 0.7f, 3f, 22f);
+
+            // 瀑布：底部的水雾和轰鸣
+            if (fall > 0 && fallDrop > 2f)
+            {
+                Vector2 dir = (pts[Mathf.Min(fall + 1, pts.Count - 1)] - pts[fall - 1]).normalized;
+                var basePos = new Vector3(pts[fall].x + dir.x * 1.5f, level[Mathf.Min(fall + 1, pts.Count - 1)], pts[fall].y + dir.y * 1.5f);
+                BuildWaterfallSpray(go.transform, basePos, Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg, fallDrop);
+                Loop(go.transform, basePos + Vector3.up * 1f, AudioClip("amb_waterfall") ?? clip, 1f, 4f, 45f);
+                Debug.Log($"[Features] waterfall: {fallDrop:0.0} m drop at {basePos}");
+            }
             Debug.Log($"[Features] river: {pts.Count} samples, {dist:0} m, source level {level[0]:0.0} m");
+        }
+
+        /// <summary>瀑布底部的水雾：柔和的白色粒子从落水处向上、向下游飘散。</summary>
+        static void BuildWaterfallSpray(Transform parent, Vector3 pos, float yaw, float height)
+        {
+            var go = new GameObject("WaterfallSpray");
+            go.transform.SetParent(parent, true);
+            go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, yaw, 0));
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.loop = true;
+            main.prewarm = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(2f, 3.5f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.6f, 1.6f);
+            main.startSize = new ParticleSystem.MinMaxCurve(1.2f, 2.8f);
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, Mathf.PI * 2f);
+            main.startColor = new Color(0.92f, 0.95f, 0.97f, 0.22f);
+            main.gravityModifier = -0.04f;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = 300;
+            var em = ps.emission;
+            em.rateOverTime = 45f + height * 8f;
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(IslandRegions.RiverHalfWidth * 1.8f, 0.4f, 1.5f);
+            var vel = ps.velocityOverLifetime;
+            vel.enabled = true;
+            vel.space = ParticleSystemSimulationSpace.Local;
+            vel.x = new ParticleSystem.MinMaxCurve(-0.3f, 0.3f);
+            vel.y = new ParticleSystem.MinMaxCurve(0.3f, 0.9f);
+            vel.z = new ParticleSystem.MinMaxCurve(0.4f, 1.2f); // 往下游飘
+            var size = ps.sizeOverLifetime;
+            size.enabled = true;
+            size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0, 0.6f, 1, 1.6f));
+            var col = ps.colorOverLifetime;
+            col.enabled = true;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+                      new[] { new GradientAlphaKey(0, 0), new GradientAlphaKey(1, 0.15f), new GradientAlphaKey(0, 1) });
+            col.color = g;
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Generated/Materials/WaterfallMist.mat") ?? MistMaterial();
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            ps.Play();
+        }
+
+        /// <summary>水雾材质：普通 alpha 混合（不是加法），白天在阳光下是白雾而不是发光。</summary>
+        static Material MistMaterial()
+        {
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
+            mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/Generated/Textures/soft_dot.png"));
+            mat.SetColor("_BaseColor", Color.white);
+            mat.SetFloat("_Surface", 1f);
+            mat.SetFloat("_Blend", 0f);
+            mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+            mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+            mat.SetFloat("_ZWrite", 0f);
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.SetOverrideTag("RenderType", "Transparent");
+            mat.renderQueue = (int)RenderQueue.Transparent;
+            AssetDatabase.CreateAsset(mat, "Assets/Art/Generated/Materials/WaterfallMist.mat");
+            return mat;
         }
 
         // ================= 红树林 =================

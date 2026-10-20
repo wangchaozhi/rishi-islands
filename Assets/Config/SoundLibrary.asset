@@ -77,6 +77,14 @@ MonoBehaviour:
     pitch: {x: 1, y: 1}
     minDistance: 1
     maxDistance: 50
+  - id: amb_waterfall
+    clips:
+    - {fileID: 8300000, guid: c234e71ebf39a4c6499777362d7901c1, type: 3}
+    category: 0
+    volume: 1
+    pitch: {x: 1, y: 1}
+    minDistance: 1
+    maxDistance: 50
   - id: amb_wind
     clips:
     - {fileID: 8300000, guid: 14f31cc14a991b243b882f3180d61155, type: 3}

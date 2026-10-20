@@ -75,6 +75,27 @@ namespace Rishi.Builders
             var riverView = new Vector3(riverMid.x + 6f, 0, riverMid.y + 7f).WithGround(Ground) + Vector3.up * 0.3f;
             var downstream = IslandRegions.RiverPath[6];
             Shot(cam, player, root, cycle, ocean, riverView, Toward(riverView, new Vector3(downstream.x, 0, downstream.y)).y, 6f, 15.5f, "10_river");
+
+            // 水面细节：瀑布、岸边涌浪、浅水焦散
+            var spray = GameObject.Find("WaterfallSpray");
+            if (spray != null)
+            {
+                var ps = spray.GetComponent<ParticleSystem>();
+                ps.Simulate(4f, true, true); // 编辑器里粒子不会自己跑，先模拟几秒
+                var fallPos = spray.transform.position;
+                var fallView = (fallPos + spray.transform.forward * 13f + spray.transform.right * 3f).WithGround(Ground) + Vector3.up * 0.2f;
+                Shot(cam, player, root, cycle, ocean, fallView, Toward(fallView, fallPos).y, 8f, 10.5f, "26_waterfall");
+            }
+            var surfView = new Vector3(spawn.x + 6f, 0, spawn.z + 2f).WithGround(Ground) + Vector3.up * 0.4f;
+            Shot(cam, player, root, cycle, ocean, surfView, 200f, 16f, 11f, "27_shore_surf");
+            // 浅水：沿出生点往海里走到水深约 1.5 米处，站在水面上往下看
+            Vector3 shallow = spawn;
+            for (float d = 0; d < 60f; d += 0.5f)
+            {
+                var sp = spawn + Vector3.back * d;
+                if (terrain.SampleHeight(sp) + terrain.transform.position.y < -1.5f) { shallow = sp; break; }
+            }
+            Shot(cam, player, root, cycle, ocean, new Vector3(shallow.x, 0.9f, shallow.z), 150f, 62f, 12f, "28_shallow_caustics");
             var inJungle = new Vector3(25f, 0, 40f).WithGround(Ground) + Vector3.up * 0.2f;
             Shot(cam, player, root, cycle, ocean, inJungle, 200f, 2f, 11f, "11_deep_jungle");
             Shot(cam, player, root, cycle, ocean, new Vector3(-170, 95, -260), 35f, 22f, 10f, "12_aerial");

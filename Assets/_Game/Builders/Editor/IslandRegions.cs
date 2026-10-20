@@ -53,6 +53,11 @@ namespace Rishi.Builders
 
         static float[] bedTable;
 
+        /// <summary>瀑布落差（米）。</summary>
+        public const float WaterfallHeight = 4f;
+        /// <summary>瀑布在溪流上的位置（t：0 = 源头，1 = 入海口），PrepareRiver 之后有效；没有合适位置时为 -1。</summary>
+        public static float WaterfallT { get; private set; } = -1f;
+
         /// <summary>
         /// 按未刻河槽的地形算出河床：沿路线每 2 米取地面高度减 2.2 米，往下游只降不升，入海口略低于海平面。
         /// 生成地形高度前调用一次。
@@ -69,6 +74,24 @@ namespace Rishi.Builders
                 float bed = baseHeight(p.x, p.y) - 2.2f;
                 if (k > 0) bed = Mathf.Min(bed, bedTable[k - 1]);
                 bedTable[k] = Mathf.Max(bed, -0.8f);
+            }
+
+            // 瀑布：在中游（t 0.2~0.6）找天然最陡的一段，把它下游的河床都压到瀑布顶下方 WaterfallHeight 米，
+            // 形成一道跌水和一段逐渐变浅的峡谷。河床仍然只降不升，水面不会埋进地形。
+            const int span = 12;
+            int best = -1;
+            float bestDrop = 0f;
+            for (int k = Mathf.Max(span, (int)(n * 0.2f)); k <= Mathf.Min(n - 1 - span, (int)(n * 0.6f)); k++)
+            {
+                float drop = bedTable[k - span] - bedTable[k + span];
+                if (drop > bestDrop) { bestDrop = drop; best = k; }
+            }
+            WaterfallT = -1f;
+            if (best >= 0 && bedTable[best] - WaterfallHeight > 0.5f)
+            {
+                float cap = bedTable[best] - WaterfallHeight;
+                for (int k = best + 1; k < n; k++) bedTable[k] = Mathf.Min(bedTable[k], cap);
+                WaterfallT = best / (n - 1f);
             }
         }
 

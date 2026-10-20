@@ -1,5 +1,6 @@
 // 溪流水面（URP）：沿网格 UV 的 v 方向流动的法线、深度吸收、折射、天空反射、浅处与岸边白水。
-// 网格约定：u = 横向 0~1，v = 沿水流方向的距离（米）。需要 URP 资产开启 Depth / Opaque Texture。
+// 网格约定：u = 横向 0~1，v = 沿水流方向的距离（米），顶点色 r = 白水程度（瀑布、急滩及其下游）。
+// 需要 URP 资产开启 Depth / Opaque Texture。
 Shader "Island/River"
 {
     Properties
@@ -14,6 +15,7 @@ Shader "Island/River"
         _Refraction ("Refraction", Range(0, 0.1)) = 0.03
         _FoamColor ("Foam Color", Color) = (0.92, 0.95, 0.95, 1)
         _FoamDepth ("Foam Depth", Float) = 0.25
+        _WhitewaterSpeed ("Whitewater Speed Multiplier", Float) = 3.5
     }
 
     SubShader
@@ -43,16 +45,17 @@ Shader "Island/River"
             CBUFFER_START(UnityPerMaterial)
                 half4 _ShallowColor, _DeepColor, _FoamColor;
                 float4 _Absorption, _NormalMap_ST;
-                float _NormalStrength, _FlowSpeed, _Tiling, _Refraction, _FoamDepth;
+                float _NormalStrength, _FlowSpeed, _Tiling, _Refraction, _FoamDepth, _WhitewaterSpeed;
             CBUFFER_END
 
-            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; };
+            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; };
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
                 float2 uv : TEXCOORD1;
                 float fog : TEXCOORD2;
+                half white : TEXCOORD3;
             };
 
             Varyings vert(Attributes v)
@@ -62,6 +65,7 @@ Shader "Island/River"
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.uv = v.uv;
                 o.fog = ComputeFogFactor(o.positionCS.z);
+                o.white = v.color.r;
                 return o;
             }
 
@@ -107,6 +111,17 @@ Shader "Island/River"
                 float foam = saturate(1 - thick / _FoamDepth) * step(0.45, foamNoise);
                 foam = max(foam, saturate(abs(i.uv.x - 0.5) * 2 - 0.85) * 4 * step(0.5, foamNoise));
                 col = lerp(col, _FoamColor.rgb * (amb + lightCol * sun * 0.7), saturate(foam) * 0.75);
+
+                // 白水：瀑布与急滩处翻滚的白色水流，流得更快，往下游逐渐散成浮沫
+                if (i.white > 0.01)
+                {
+                    float fast = _Time.y * _FlowSpeed * _WhitewaterSpeed;
+                    float w1 = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, float2(i.uv.x * 2.7, i.uv.y * 0.6 - fast) * _Tiling * 2.1).r;
+                    float w2 = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, float2(i.uv.x * 4.3 + 0.21, i.uv.y * 0.9 - fast * 1.4) * _Tiling * 3.3).g;
+                    float churn = smoothstep(0.35, 0.85, (w1 + w2) * 0.9 - 0.45 + i.white * 0.35); // 一条条翻滚的白水，中间透出水色
+                    half3 whiteCol = _FoamColor.rgb * (amb * 1.1 + lightCol * sun * (0.5 + 0.5 * L.shadowAttenuation));
+                    col = lerp(col, whiteCol, churn * i.white * 0.85);
+                }
 
                 return half4(MixFog(col, i.fog), 1);
             }
