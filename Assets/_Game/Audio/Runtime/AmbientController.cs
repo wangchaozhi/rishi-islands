@@ -23,6 +23,9 @@ namespace Rishi.Audio
         [Range(0, 1)] public float weatherBirdDamp;
         [Tooltip("风声加成")]
         public float weatherWind;
+        [Header("潮汐")]
+        [Tooltip("海浪声在最低潮 → 最高潮时的音量倍数")]
+        public Vector2 tideSurf = new Vector2(0.7f, 1.25f);
 
         class Layer
         {
@@ -75,7 +78,7 @@ namespace Rishi.Audio
             bool inTemple = zones.Contains("temple");
             float indoor = inTemple ? 0.3f : 1f;
 
-            Set("amb_ocean", Mathf.Lerp(1f, 0.12f, Mathf.InverseLerp(2f, 30f, y)) * indoor * 0.9f);
+            Set("amb_ocean", Mathf.Lerp(1f, 0.12f, Mathf.InverseLerp(2f, 30f, y - GameSignals.SeaLevel)) * indoor * 0.9f * Mathf.Lerp(tideSurf.x, tideSurf.y, GameSignals.Tide01)); // 高潮时浪声更大
             Set("amb_wind", (0.25f + Mathf.InverseLerp(5f, 45f, y) * 0.5f + weatherWind) * indoor);
             Set("amb_jungle_day", day * Mathf.Lerp(0.25f, 1f, vegetation) * indoor * 0.8f * (1f - weatherBirdDamp));
             Set("amb_night", (1f - day) * indoor * 0.75f);

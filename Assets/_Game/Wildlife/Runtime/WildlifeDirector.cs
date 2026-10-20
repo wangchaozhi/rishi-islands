@@ -119,7 +119,7 @@ namespace Rishi.Wildlife
 
         Critter SpawnCrab()
         {
-            if (!FindSpot(6f, config.spawnRadius, (p, h) => h > 0.15f && h < 2.6f && SurfaceTag.TerrainSurface(terrain, p).Contains("sand"), out var pos)) return null;
+            if (!FindSpot(6f, config.spawnRadius, (p, h) => h > GameSignals.SeaLevel + 0.15f && h < 2.6f && SurfaceTag.TerrainSurface(terrain, p).Contains("sand"), out var pos)) return null;
             var go = Critters.Crab();
             go.transform.position = pos;
             var c = go.AddComponent<Crab>();

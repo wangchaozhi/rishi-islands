@@ -17,6 +17,7 @@ namespace Rishi.Builders
 
         public static DayNightConfig DayNight => LoadOrCreate<DayNightConfig>("DayNight");
         public static WindConfig Wind => LoadOrCreate<WindConfig>("Wind");
+        public static TideConfig Tide => LoadOrCreate<TideConfig>("Tide");
         public static WeatherProfile Storm => LoadOrCreate("Weather_Storm", WeatherProfile.CreateStorm);
         public static WildlifeConfig Wildlife => LoadOrCreate<WildlifeConfig>("Wildlife");
         public static SoundLibrary Sounds => LoadOrCreate<SoundLibrary>("SoundLibrary");

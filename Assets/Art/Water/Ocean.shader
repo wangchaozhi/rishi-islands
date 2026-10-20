@@ -82,6 +82,7 @@ Shader "Island/Ocean"
             TEXTURE2D(_NormalMap);    SAMPLER(sampler_NormalMap);
             TEXTURE2D(_IslandHeight); SAMPLER(sampler_IslandHeight);
             TEXTURE2D(_IslandHeight2); SAMPLER(sampler_IslandHeight2);
+            float _IslandSeaLevel; // 潮汐：当前海平面（TideController 写入的全局变量）
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _ShallowColor, _DeepColor, _FoamColor;
@@ -134,7 +135,7 @@ Shader "Island/Ocean"
                 return float3(d.x * a * co, a * s, d.y * a * co);
             }
 
-            // 海平面 y=0 下方的水深：主岛和第二座岛（环礁）各有一张高度图，取较浅的那个
+            // 当前海平面（随潮汐涨落）下方的水深：主岛和第二座岛（环礁）各有一张高度图，取较浅的那个
             float WaterDepthAt(float2 xz)
             {
                 float depth = 100;
@@ -144,7 +145,7 @@ Shader "Island/Ocean"
                 float2 uv2 = (xz - _IslandRect2.xy) / _IslandRect2.zw;
                 if (all(uv2 >= 0) && all(uv2 <= 1))
                     depth = min(depth, -(_IslandHeightRange2.x + SAMPLE_TEXTURE2D_LOD(_IslandHeight2, sampler_IslandHeight2, uv2, 0).r * _IslandHeightRange2.y));
-                return depth;
+                return depth + _IslandSeaLevel;
             }
 
             // 涌浪相位：一组浪线从 _SurfDepth 深处推向岸边，周期 _SurfPeriod 秒；水深越浅相位越靠后
@@ -322,11 +323,11 @@ Shader "Island/Ocean"
                 half3 scatter = _DeepColor.rgb * (ambient * 1.2 + lightCol * sunAmount * 0.35);
                 // 浅水海底的焦散：沿视线把折射处的场景深度还原成海底位置，沿阳光方向投影后叠加光斑（受阴影遮挡）
                 float3 bed = _WorldSpaceCameraPos + (posWS - _WorldSpaceCameraPos) * (refrEye / max(surfaceEye, 1e-3));
-                float bedDepth = -bed.y;
+                float bedDepth = _IslandSeaLevel - bed.y;
                 float causticFade = saturate(bedDepth * 2) * saturate(1 - bedDepth / _CausticDepth) * saturate(thickness * 3);
                 if (causticFade > 0.001 && sunAmount > 0.02)
                 {
-                    float2 cp = (bed.xz - mainLight.direction.xz / max(mainLight.direction.y, 0.2) * bed.y) * _CausticScale;
+                    float2 cp = (bed.xz - mainLight.direction.xz / max(mainLight.direction.y, 0.2) * (bed.y - _IslandSeaLevel)) * _CausticScale;
                     float bedShadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(bed));
                     sceneColor *= 1 + Caustics(cp) * _CausticStrength * causticFade * sunAmount * bedShadow * lightCol;
                 }

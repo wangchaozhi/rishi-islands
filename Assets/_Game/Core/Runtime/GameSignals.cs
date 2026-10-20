@@ -43,8 +43,12 @@ namespace Rishi.Core
         public static event Action<string> ToastRaised;
 
         // ---------- 水 ----------
-        /// <summary>海平面高度（世界坐标 y）。</summary>
-        public const float SeaLevel = 0f;
+        /// <summary>海平面高度（世界坐标 y），随潮汐涨落（TideController 写入，平均海平面是 0）。</summary>
+        public static float SeaLevel { get; set; }
+        /// <summary>潮位 0（最低潮）~ 1（最高潮）。</summary>
+        public static float Tide01 { get; set; } = 0.5f;
+        /// <summary>正在涨潮。</summary>
+        public static bool TideRising { get; set; }
         /// <summary>玩家正在游泳（水面或水下）。</summary>
         public static bool Swimming { get; set; }
         /// <summary>摄像机在水面以下。</summary>
@@ -125,6 +129,9 @@ namespace Rishi.Core
             ToastRaised = null;
             Player = null;
             Swimming = HeadUnderwater = false;
+            SeaLevel = 0f;
+            Tide01 = 0.5f;
+            TideRising = false;
             CameraDepth = 0f;
             Oxygen = 1f;
             ScreenFade = 0f;

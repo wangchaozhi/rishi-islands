@@ -207,6 +207,7 @@ namespace Rishi.Builders
             CaptureBeasts(cam, player, root, cycle, ocean);
             CaptureAtoll(cam, player, root, cycle, ocean, spawn);
             CaptureBoat(cam, player, root, cycle, ocean);
+            CaptureTide(cam, player, root, cycle, ocean, spawn, spawnYaw);
             // 砍刀能砍开的灌木丛，和营地旁被灌木围住的补给箱
             var terrainT = IslandBuilder.MainTerrain;
             foreach (var (name, dist, height, file) in new[] { ("Thicket", 4.5f, 1.4f, "53_thicket"), ("HiddenCache", 5.5f, 2.6f, "54_hidden_cache") })
@@ -540,6 +541,34 @@ namespace Rishi.Builders
             }
         }
 
+        /// <summary>潮汐：同一个机位，高潮（10:06）和低潮（16:18）——出生的沙滩看沉船、环礁沙洲上看外侧的礁坪。</summary>
+        static void CaptureTide(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean, Vector3 spawn, float spawnYaw)
+        {
+            var tide = Object.FindFirstObjectByType<TideController>();
+            if (tide == null || tide.config == null) return;
+            float high = tide.config.firstHighTideHour, low = high + tide.config.periodHours * 0.5f;
+            Shot(cam, player, root, cycle, ocean, spawn, spawnYaw, 6f, high, "62_tide_high_beach");
+            Shot(cam, player, root, cycle, ocean, spawn, spawnYaw, 6f, low, "63_tide_low_beach");
+
+            var spec = AtollBuilder.Default;
+            var atoll = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None).FirstOrDefault(t => t.name == spec.name);
+            if (atoll == null) return;
+            var c = new Vector3(spec.center.x, 0, spec.center.y);
+            Vector3 best = c; float bestH = -99f;
+            for (float a = 0; a < 360f; a += 2f)
+                for (float r = spec.ringRadius * 0.75f; r < spec.ringRadius * 1.2f; r += 3f)
+                {
+                    var p = c + Quaternion.Euler(0, a, 0) * Vector3.forward * r;
+                    float h = atoll.SampleHeight(p) + atoll.transform.position.y;
+                    if (h > bestH) { bestH = h; best = p; }
+                }
+            var eye = best + Vector3.up * (bestH + 2.5f); // 站在沙洲最高处再高一点，看得见外侧的礁坪
+            var outward = best - c; outward.y = 0;
+            float yaw = Mathf.Atan2(outward.x, outward.z) * Mathf.Rad2Deg;
+            Shot(cam, player, root, cycle, ocean, eye, yaw, 16f, high, "64_tide_high_reef");
+            Shot(cam, player, root, cycle, ocean, eye, yaw, 16f, low, "65_tide_low_reef");
+        }
+
         /// <summary>小艇：搁在沙滩上船底破着、修好之后，和开到海上坐在船里看向环礁。</summary>
         static void CaptureBoat(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean)
         {
@@ -625,6 +654,7 @@ namespace Rishi.Builders
             cycle.timeOfDay = time;
             if (ufx != null) ufx.ApplyNow();
             cycle.Apply(false);
+            Object.FindFirstObjectByType<TideController>()?.Apply(); // 海平面跟着这个时刻的潮位
             if (ufx != null) ufx.ApplyNow();
             DynamicGI.UpdateEnvironment();
             if (cycle.skyProbe != null)
@@ -633,7 +663,7 @@ namespace Rishi.Builders
                 cycle.skyProbe.RenderProbe();
             }
             var cp = cam.transform.position;
-            ocean.transform.position = new Vector3(Mathf.Round(cp.x / 4) * 4, 0, Mathf.Round(cp.z / 4) * 4);
+            ocean.transform.position = new Vector3(Mathf.Round(cp.x / 4) * 4, GameSignals.SeaLevel, Mathf.Round(cp.z / 4) * 4);
 
             const int w = 1600, h = 900;
             var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);

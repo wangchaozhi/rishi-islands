@@ -75,7 +75,7 @@ namespace Rishi.Creatures
                 var dir = Quaternion.Euler(0, yaw, 0) * fwd;
                 var candidate = p + dir * Random.Range(spawnDistance.x, spawnDistance.y);
                 if (!NavMesh.SamplePosition(candidate, out var hit, 8f, NavMesh.AllAreas)) continue;
-                if (hit.position.y < 0.3f) continue; // 不在水里
+                if (hit.position.y < GameSignals.SeaLevel + 0.3f) continue; // 不在水里
                 bool nearFire = false;
                 foreach (var f in FindObjectsByType<Light>(FindObjectsSortMode.None))
                     if (f.enabled && f.type == LightType.Point && f.range > 5f && (f.transform.position - hit.position).sqrMagnitude < f.range * f.range) { nearFire = true; break; }

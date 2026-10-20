@@ -87,6 +87,8 @@ namespace Rishi.UI
             {
                 var clockStyle = new GUIStyle(hintStyle) { fontSize = 22, alignment = TextAnchor.UpperRight, fontStyle = FontStyle.Bold };
                 GUI.Label(new Rect(Screen.width - 216, 10, 200, 34), dayNight.Clock, clockStyle);
+                var tideStyle = new GUIStyle(hintStyle) { fontSize = 15, alignment = TextAnchor.UpperRight };
+                GUI.Label(new Rect(Screen.width - 216, 40, 200, 24), (GameSignals.TideRising ? "涨潮 ↑" : "退潮 ↓") + $"  潮位 {Mathf.RoundToInt(GameSignals.Tide01 * 100f)}%", tideStyle);
             }
 
             // 黑场画在最上面

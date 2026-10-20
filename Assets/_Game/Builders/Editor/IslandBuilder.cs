@@ -192,6 +192,12 @@ namespace Rishi.Builders
             cycle.skyProbe = probe;
             cycle.timeOfDay = cycle.config.startTime;
 
+            // 潮汐：海平面随游戏时间涨落（海面、水深、游泳、小艇都跟着走）
+            var tide = new GameObject("Tide").AddComponent<TideController>();
+            tide.config = ConfigAssets.Tide;
+            tide.dayNight = cycle;
+            tide.Apply();
+
             CreateTerrain(out var heightTex);
             var atoll = AtollBuilder.BuildTerrain(AtollBuilder.Default); // 第二座岛：环礁
             CreateOcean(heightTex, atoll);
