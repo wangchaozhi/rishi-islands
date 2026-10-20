@@ -155,7 +155,8 @@ MonoBehaviour:
     maxDistance: 8
   - id: chest_open
     clips:
-    - {fileID: 8300000, guid: de5d49012113b7347ab083d510e9a8cd, type: 3}
+    - {fileID: 8300000, guid: 448de53ae2a2d454ebe589431e077637, type: 3}
+    - {fileID: 8300000, guid: 95d93655fea464ab99649331ce8a45c9, type: 3}
     category: 1
     volume: 0.9
     pitch: {x: 0.94, y: 1.06}
@@ -338,7 +339,11 @@ MonoBehaviour:
     maxDistance: 45
   - id: impact_dirt
     clips:
-    - {fileID: 8300000, guid: da763e970408fa3408c6797683ed58ed, type: 3}
+    - {fileID: 8300000, guid: 1cd16e6e079364d29a7196d154350a07, type: 3}
+    - {fileID: 8300000, guid: ecc45900b7a0c412d9905dcb85d266ce, type: 3}
+    - {fileID: 8300000, guid: 4cfb997febb314493833034eb5879348, type: 3}
+    - {fileID: 8300000, guid: 7949391c7794148bfaf40084a764da5b, type: 3}
+    - {fileID: 8300000, guid: 688d7abeede154782ba8c43311f2fafe, type: 3}
     category: 1
     volume: 0.7
     pitch: {x: 0.94, y: 1.06}
@@ -346,7 +351,11 @@ MonoBehaviour:
     maxDistance: 35
   - id: impact_metal
     clips:
-    - {fileID: 8300000, guid: 0b70ab1b7b92cd24b9bb0769ccdd7b99, type: 3}
+    - {fileID: 8300000, guid: 7779619bbcc0249ee82f1c283dba5d18, type: 3}
+    - {fileID: 8300000, guid: 40968f26fd58944ddb749a98fcc28abc, type: 3}
+    - {fileID: 8300000, guid: c6eb90b8fa95444c8a6faa8adcb71bd1, type: 3}
+    - {fileID: 8300000, guid: 7acaf5f90dea64cb3ae32d841871b55d, type: 3}
+    - {fileID: 8300000, guid: 38ae38610d5394e448730dbdb61c9e13, type: 3}
     category: 1
     volume: 0.7
     pitch: {x: 0.94, y: 1.06}
@@ -354,7 +363,11 @@ MonoBehaviour:
     maxDistance: 35
   - id: impact_stone
     clips:
-    - {fileID: 8300000, guid: 015e785b858e3534f8f902242428654a, type: 3}
+    - {fileID: 8300000, guid: 8a0ece26014c34cddb308d439f7a0a5a, type: 3}
+    - {fileID: 8300000, guid: ca5ac4fe5b2f546b0ab72cf70bbf1dde, type: 3}
+    - {fileID: 8300000, guid: c66a997655842454e8c132468658319a, type: 3}
+    - {fileID: 8300000, guid: 8a89c36f476284736bc7b13b9e9da79a, type: 3}
+    - {fileID: 8300000, guid: 71908d1ebe2cc4b5fb8d3a0b8ed92dfd, type: 3}
     category: 1
     volume: 0.7
     pitch: {x: 0.94, y: 1.06}
@@ -362,7 +375,11 @@ MonoBehaviour:
     maxDistance: 35
   - id: impact_wood
     clips:
-    - {fileID: 8300000, guid: 78943ab369f1a8841a7cafc56088b016, type: 3}
+    - {fileID: 8300000, guid: 593a75ba88a6346bcbe0519e928c2617, type: 3}
+    - {fileID: 8300000, guid: 54ff5688feb0040be9cab3df18108b42, type: 3}
+    - {fileID: 8300000, guid: ff27cef58b3f944a2bfb9b178f99de64, type: 3}
+    - {fileID: 8300000, guid: 8fa5d1d42158747c1ad47fa52b5b9be0, type: 3}
+    - {fileID: 8300000, guid: d375a5ae6f9a94adba889572975c4ee7, type: 3}
     category: 1
     volume: 0.7
     pitch: {x: 0.94, y: 1.06}
@@ -402,7 +419,9 @@ MonoBehaviour:
     maxDistance: 80
   - id: machete_draw
     clips:
-    - {fileID: 8300000, guid: 4902a5866a720eb49bf9b5a1cc6eaada, type: 3}
+    - {fileID: 8300000, guid: 5383968fe3c2b4926b3e4297e1c55580, type: 3}
+    - {fileID: 8300000, guid: 9df5915a2226244d9a2689b8910358d9, type: 3}
+    - {fileID: 8300000, guid: 6372dc303807847b7a95df94a0ced18d, type: 3}
     category: 1
     volume: 0.8
     pitch: {x: 0.94, y: 1.06}
@@ -410,7 +429,11 @@ MonoBehaviour:
     maxDistance: 25
   - id: machete_hit_flesh
     clips:
-    - {fileID: 8300000, guid: 6e8ce6026214837429836e637a62af23, type: 3}
+    - {fileID: 8300000, guid: a41b5e5a4c1704d5ca14fbbeb3a5ef1c, type: 3}
+    - {fileID: 8300000, guid: 87f6c1ec732f645dcb4ef1eb39518426, type: 3}
+    - {fileID: 8300000, guid: a06ae4b08e3fc4661b64211384579482, type: 3}
+    - {fileID: 8300000, guid: b8ee2c0dc577c4ab3a17d3457753ee18, type: 3}
+    - {fileID: 8300000, guid: bf7a252c481674826ba8206e6beece60, type: 3}
     category: 1
     volume: 0.8
     pitch: {x: 0.94, y: 1.06}
@@ -418,7 +441,11 @@ MonoBehaviour:
     maxDistance: 25
   - id: machete_hit_stone
     clips:
-    - {fileID: 8300000, guid: 2867b48054256224d806e782c4d142d8, type: 3}
+    - {fileID: 8300000, guid: 972e50a24f7d5406a8b6b9dd160732b1, type: 3}
+    - {fileID: 8300000, guid: bbc305ba97844470986a17ed84c94f07, type: 3}
+    - {fileID: 8300000, guid: 22e087e1cc31a4bfe821511fc385d90e, type: 3}
+    - {fileID: 8300000, guid: cf9e199c3f1a841bcaae2af74bf6152f, type: 3}
+    - {fileID: 8300000, guid: 0d2eac70a1e0147b8afaf5b4da63d45c, type: 3}
     category: 1
     volume: 0.8
     pitch: {x: 0.94, y: 1.06}
@@ -426,7 +453,11 @@ MonoBehaviour:
     maxDistance: 25
   - id: machete_hit_wood
     clips:
-    - {fileID: 8300000, guid: 750238efc73595a4092710c52b0ab3fb, type: 3}
+    - {fileID: 8300000, guid: c96b806b9a7f04dc285215b15140aed9, type: 3}
+    - {fileID: 8300000, guid: fd2948112da594e3380fe30478973dbe, type: 3}
+    - {fileID: 8300000, guid: b07696ea8f5804e1a85cb7dfa067030a, type: 3}
+    - {fileID: 8300000, guid: 33bf629c5a99c4ba9977cc81d96db8f0, type: 3}
+    - {fileID: 8300000, guid: 0404a980ba62a4aa2ac622cf311fce43, type: 3}
     category: 1
     volume: 0.8
     pitch: {x: 0.94, y: 1.06}
@@ -615,10 +646,11 @@ MonoBehaviour:
     maxDistance: 30
   - id: step_grass
     clips:
-    - {fileID: 8300000, guid: 1967cb143e85d3741bb53a5455e9f166, type: 3}
-    - {fileID: 8300000, guid: 4d0472617fed2fb4c9c5004cb93114c4, type: 3}
-    - {fileID: 8300000, guid: 9e00f19b50b138d4aa9c68badd41e94f, type: 3}
-    - {fileID: 8300000, guid: 1d8b7137062bfe34aa0c62798d59fb35, type: 3}
+    - {fileID: 8300000, guid: 462aa580580a649cabf9229f07d1d0be, type: 3}
+    - {fileID: 8300000, guid: 2aeeea253fde9487a9539b03d6b33f93, type: 3}
+    - {fileID: 8300000, guid: 39fe39ba4343b43ca887e941d622cf82, type: 3}
+    - {fileID: 8300000, guid: a86a8da0869ed4b218bf70aa57034173, type: 3}
+    - {fileID: 8300000, guid: 2b68a6edd76c94619ae1e8f97863e9f5, type: 3}
     category: 1
     volume: 0.55
     pitch: {x: 0.94, y: 1.06}
@@ -626,10 +658,11 @@ MonoBehaviour:
     maxDistance: 20
   - id: step_leaves
     clips:
-    - {fileID: 8300000, guid: df1c21e01a714a540a3ffd229ae807d1, type: 3}
-    - {fileID: 8300000, guid: a410047458e20394abca718c90dbe9bb, type: 3}
-    - {fileID: 8300000, guid: 8e8a6692c5a2fe34b807b7fb9acbd6dc, type: 3}
-    - {fileID: 8300000, guid: 6bc36a02ca80f49478bbf38c07c625e5, type: 3}
+    - {fileID: 8300000, guid: b286c2fb065064957a72ff939330f40c, type: 3}
+    - {fileID: 8300000, guid: d4b26414342a74f389d0c67f0125d52e, type: 3}
+    - {fileID: 8300000, guid: 9deee5bc23da74b49bc796229f8f4ce1, type: 3}
+    - {fileID: 8300000, guid: c6317ac879577463e96b6d80edd285bd, type: 3}
+    - {fileID: 8300000, guid: 957068c542b2c46239447449326b0ad7, type: 3}
     category: 1
     volume: 0.55
     pitch: {x: 0.94, y: 1.06}
@@ -637,10 +670,11 @@ MonoBehaviour:
     maxDistance: 20
   - id: step_sand
     clips:
-    - {fileID: 8300000, guid: eb54f907d50f2014a90841353c42e43d, type: 3}
-    - {fileID: 8300000, guid: c595a46d275081646974a8d066704289, type: 3}
-    - {fileID: 8300000, guid: f5c33ee751a97a841b4207cb7abb4ce8, type: 3}
-    - {fileID: 8300000, guid: ca56a431ea1003a4ab0069248957be4d, type: 3}
+    - {fileID: 8300000, guid: a6c13d0b28f45449cbabc5745f7e66dd, type: 3}
+    - {fileID: 8300000, guid: cebc80a0c627c4c15a1ebf8a1c1ee568, type: 3}
+    - {fileID: 8300000, guid: d48d70e1a8d8648e3a9444901a90e482, type: 3}
+    - {fileID: 8300000, guid: 740be6e1cbc7947d59562421aba4038c, type: 3}
+    - {fileID: 8300000, guid: dba748077f57c48efa5a135050b05fbf, type: 3}
     category: 1
     volume: 0.55
     pitch: {x: 0.94, y: 1.06}
@@ -648,10 +682,11 @@ MonoBehaviour:
     maxDistance: 20
   - id: step_stone
     clips:
-    - {fileID: 8300000, guid: 2dd7224d4e1a6654ea0f5b1454c93b2d, type: 3}
-    - {fileID: 8300000, guid: af75fc999b245694a8367d21be85d14c, type: 3}
-    - {fileID: 8300000, guid: d3f6809f151d3774aa8688474b47676d, type: 3}
-    - {fileID: 8300000, guid: 9290982e37895b94faa5d44169cbfa80, type: 3}
+    - {fileID: 8300000, guid: a025020158eaf438ea39c5cc9ed352c4, type: 3}
+    - {fileID: 8300000, guid: 075a17528d09243689905ed92f37b88d, type: 3}
+    - {fileID: 8300000, guid: a82642acf2c3d4c2f86873228ff9b342, type: 3}
+    - {fileID: 8300000, guid: 5981ad0e85271487fa9274520e0ec511, type: 3}
+    - {fileID: 8300000, guid: 0253ccf3a5d504110af271661ae7649e, type: 3}
     category: 1
     volume: 0.55
     pitch: {x: 0.94, y: 1.06}
@@ -681,10 +716,11 @@ MonoBehaviour:
     maxDistance: 20
   - id: step_wood
     clips:
-    - {fileID: 8300000, guid: acf3403088a03d441a54107ae8e6f815, type: 3}
-    - {fileID: 8300000, guid: beb80f7c3663b47458995235eb8609b3, type: 3}
-    - {fileID: 8300000, guid: c7aa58091fd9176408743c0ac98263ff, type: 3}
-    - {fileID: 8300000, guid: 38827dbd29047cb45bb2e67cceb18631, type: 3}
+    - {fileID: 8300000, guid: 4cfb7cb90a8b64371857754a72730ad6, type: 3}
+    - {fileID: 8300000, guid: a4fa9903eb3f344e9a55f295410c8c7d, type: 3}
+    - {fileID: 8300000, guid: 44928ef1c02ac465f8b245a94fb7b262, type: 3}
+    - {fileID: 8300000, guid: 7097fb96fac36477b9796513d142c1d8, type: 3}
+    - {fileID: 8300000, guid: 5759524d9af7a4645a1989f44d202f32, type: 3}
     category: 1
     volume: 0.55
     pitch: {x: 0.94, y: 1.06}
