@@ -199,6 +199,7 @@ namespace Rishi.Builders
             CaptureCreature(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureShade(cam, player, root, cycle, ocean, spawn, spawnYaw);
             CaptureFirstNight(cam, player, root, cycle, ocean);
+            CaptureBeasts(cam, player, root, cycle, ocean);
             // 碎片的代价：同一个黄昏视角，0 块碎片和 4 块碎片时的雾
             foreach (var (n, file) in new[] { (0, "47_dusk_fragments0"), (4, "48_dusk_fragments4") })
             {
@@ -491,6 +492,34 @@ namespace Rishi.Builders
                 Shot(cam, player, root, cycle, ocean, eye, Mathf.Atan2(pp.x - eye.x, pp.z - eye.z) * Mathf.Rad2Deg, -2f, 16.5f, "46_peter_treeline");
             }
             ev.PreviewShow(false);
+        }
+
+        /// <summary>野猪和椰子蟹：白天的样子，和夜里用手电照着的蚀化形态。</summary>
+        static void CaptureBeasts(Camera cam, Transform player, Transform root, DayNightCycle cycle, OceanFollow ocean)
+        {
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            var fl = player.GetComponent<Flashlight>();
+            var wc = cam.GetComponent<WeaponController>();
+            foreach (var (name, dist, file) in new[] { ("Boar", 4.2f, "49_boar"), ("CoconutCrab", 2.6f, "51_coconut_crab") })
+            {
+                var go = GameObject.Find(name);
+                if (go == null) continue;
+                var beast = go.GetComponent<Rishi.Creatures.Beast>();
+                var p = go.transform.position;
+                var eye = p + go.transform.forward * dist + go.transform.right * dist * 0.4f;
+                eye.y = terrain.SampleHeight(eye) + terrain.transform.position.y + 1.05f;
+                float yaw = Mathf.Atan2(p.x - eye.x, p.z - eye.z) * Mathf.Rad2Deg;
+                float pitch = Mathf.Atan2(eye.y + 0.7f - (p.y + 0.4f), dist) * Mathf.Rad2Deg;
+                beast.Preview(false);
+                Shot(cam, player, root, cycle, ocean, eye, yaw, pitch, 10.5f, file + "_day");
+                beast.Preview(true);
+                if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(false);
+                fl?.PreviewOn(true);
+                Shot(cam, player, root, cycle, ocean, eye, yaw, pitch, 22.5f, file + "_eclipse");
+                fl?.PreviewOn(false);
+                if (wc != null && wc.idleLeftArm != null) wc.idleLeftArm.SetActive(true);
+                beast.Preview(false);
+            }
         }
 
         static Vector3 WithGround(this Vector3 v, System.Func<float, float, float> ground) => new Vector3(v.x, ground(v.x, v.z), v.z);

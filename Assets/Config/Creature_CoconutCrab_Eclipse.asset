@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d78c033cb63424031a7c822c57054dfa, type: 3}
+  m_Name: Creature_CoconutCrab_Eclipse
+  m_EditorClassIdentifier: Rishi.Creatures::Rishi.Creatures.CreatureDef
+  displayName: "\u8680\u5316\u6930\u5B50\u87F9"
+  maxHealth: 70
+  damageTaken: 0.6
+  walkSpeed: 0.7
+  runSpeed: 3
+  wanderRadius: 8
+  sightRange: 14
+  sightAngle: 200
+  flashlightSightBonus: 1.6
+  memorySeconds: 6
+  aggroRange: 10
+  hearing: 0.8
+  lightReaction: 0
+  stunSeconds: 1.5
+  retreatSeconds: 3
+  attackDamage: 30
+  attackRange: 1.3
+  attackCooldown: 1.8
+  attackWindup: 0.45
+  activeAtDay: 1
+  activeAtNight: 1
+  fearPerSecond: 0.05
+  idleSound: ccrab_idle
+  idleInterval: {x: 6, y: 14}
+  alertSound: ccrab_alert
+  attackSound: ccrab_attack
+  hurtSound: ccrab_hurt
+  deathSound: ccrab_death

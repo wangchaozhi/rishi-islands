@@ -71,15 +71,7 @@ namespace Rishi.Builders
         });
 
         /// <summary>眼睛：暗暗的橙色微光（不是亮红），只在近处看得清。</summary>
-        static Material EyeMaterial() => Load("ShadeEyes", () =>
-        {
-            var m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            m.SetColor("_BaseColor", Color.black);
-            m.EnableKeyword("_EMISSION");
-            m.SetColor("_EmissionColor", new Color(1.4f, 0.55f, 0.18f));
-            m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-            return m;
-        });
+        static Material EyeMaterial() => ConfigAssets.Glow("ShadeEyes", new Color(1.6f, 0.6f, 0.2f));
 
         static Material ParticleMat(string name) => Load(name, () =>
         {

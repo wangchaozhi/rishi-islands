@@ -20,6 +20,8 @@ namespace Rishi.Creatures
 
         [Header("生命")]
         public float maxHealth = 100f;
+        [Tooltip("受到伤害的倍数（椰子蟹有硬壳）")]
+        public float damageTaken = 1f;
 
         [Header("移动")]
         public float walkSpeed = 1.4f;
@@ -34,6 +36,9 @@ namespace Rishi.Creatures
         public float flashlightSightBonus = 1.6f;
         [Tooltip("看不见玩家后还记得多少秒")]
         public float memorySeconds = 6f;
+
+        [Tooltip("看见玩家后，玩家要走进多近才会动手（野兽白天不主动攻击远处的人）；被打过就不管距离")]
+        public float aggroRange = 999f;
 
         [Header("听觉")]
         [Tooltip("噪声半径的倍数：1 = 正常听力")]

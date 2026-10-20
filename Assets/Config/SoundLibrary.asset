@@ -135,6 +135,55 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 5
+  - id: boar_alert
+    clips:
+    - {fileID: 8300000, guid: 08f1f4c7a11904fc98924c6ecd18ca09, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boar_charge
+    clips:
+    - {fileID: 8300000, guid: 5d2560b330ef940239d40af31dfc807a, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boar_death
+    clips:
+    - {fileID: 8300000, guid: bd55b7633a24b4a6aba7de8efa310ccd, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boar_hit
+    clips:
+    - {fileID: 8300000, guid: bd2349e6c9488442abe63f30fad2b98a, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boar_hurt
+    clips:
+    - {fileID: 8300000, guid: 77c36a4d5edcc4b2e90682753c611d48, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
+  - id: boar_idle
+    clips:
+    - {fileID: 8300000, guid: d993aea173bc94ff597d0c3a8a591dbf, type: 3}
+    - {fileID: 8300000, guid: 673789aa71da34a9d8c123ed8d662538, type: 3}
+    category: 1
+    volume: 0.9
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 2
+    maxDistance: 40
   - id: breath_hurt
     clips:
     - {fileID: 8300000, guid: d687b02d141144098902ddebf0f32b8a, type: 3}
@@ -153,6 +202,47 @@ MonoBehaviour:
     pitch: {x: 0.94, y: 1.06}
     minDistance: 1
     maxDistance: 8
+  - id: ccrab_alert
+    clips:
+    - {fileID: 8300000, guid: 725c48a82395b4c30b6d0bff508a9448, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
+  - id: ccrab_attack
+    clips:
+    - {fileID: 8300000, guid: 20ac77e1bb9fb47058a8ead9da152b72, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
+  - id: ccrab_death
+    clips:
+    - {fileID: 8300000, guid: dccb412c377334cb78dc41b8b97cd980, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
+  - id: ccrab_hurt
+    clips:
+    - {fileID: 8300000, guid: aff60549ff1d54639abc8d5761e5d948, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
+  - id: ccrab_idle
+    clips:
+    - {fileID: 8300000, guid: ceaa98db3380f419bba29d8b1258565c, type: 3}
+    - {fileID: 8300000, guid: 08f827319e7d449d18fa8c61abf723d7, type: 3}
+    category: 1
+    volume: 0.85
+    pitch: {x: 0.94, y: 1.06}
+    minDistance: 1.5
+    maxDistance: 25
   - id: chest_open
     clips:
     - {fileID: 8300000, guid: 448de53ae2a2d454ebe589431e077637, type: 3}

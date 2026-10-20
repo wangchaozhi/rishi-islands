@@ -39,7 +39,7 @@ namespace Rishi.Creatures
         NavMeshAgent agent;
         Vector3 home, target, lastSeen;
         float stateTime, lastSeenTime = -999f, nextAttack, nextIdleSound, senseTimer, attackTimer = -1f;
-        bool attackQueued, fresh;
+        bool attackQueued, fresh, provoked;
 
         void Awake()
         {
@@ -84,7 +84,7 @@ namespace Rishi.Creatures
                 case CreatureState.Idle:
                     Stop();
                     if (stateTime > 3f) SetState(CreatureState.Wander);
-                    if (SeesPlayer) Alert();
+                    if (SeesPlayer && WantsToAttack()) Alert();
                     break;
                 case CreatureState.Wander:
                     if (fresh)
@@ -95,11 +95,11 @@ namespace Rishi.Creatures
                     }
                     else if (stateTime > 0.5f && (Arrived() || stateTime > 25f)) { SetState(CreatureState.Idle); break; }
                     MoveTo(target, def.walkSpeed);
-                    if (SeesPlayer) Alert();
+                    if (SeesPlayer && WantsToAttack()) Alert();
                     break;
                 case CreatureState.Investigate:
                     MoveTo(target, Mathf.Lerp(def.walkSpeed, def.runSpeed, 0.4f));
-                    if (SeesPlayer) Alert();
+                    if (SeesPlayer && WantsToAttack()) Alert();
                     else if (Arrived() || stateTime > 20f) { if (stateTime > 3f) SetState(CreatureState.Wander); }
                     break;
                 case CreatureState.Chase:
@@ -191,6 +191,14 @@ namespace Rishi.Creatures
             SetState(CreatureState.Investigate);
         }
 
+        /// <summary>看见玩家后要不要动手：被打过（激怒）或玩家走进了 aggroRange。</summary>
+        bool WantsToAttack() => ShouldAggro(provoked, Player != null ? Vector3.Distance(transform.position, Player.position) : 999f, def.aggroRange);
+
+        public static bool ShouldAggro(bool provoked, float distance, float aggroRange) => provoked || distance <= aggroRange;
+
+        /// <summary>被打过，之后看见就追。</summary>
+        public bool Provoked => provoked;
+
         void Alert()
         {
             AudioManager.Play(def.alertSound, EyePos, 1f);
@@ -251,7 +259,8 @@ namespace Rishi.Creatures
         public bool TakeDamage(float amount)
         {
             if (Dead || amount <= 0f) return false;
-            Health = Mathf.Max(0f, Health - amount);
+            provoked = true;
+            Health = Mathf.Max(0f, Health - amount * (def != null ? def.damageTaken : 1f));
             if (Health <= 0f) { Die(); return true; }
             if (def != null)
             {

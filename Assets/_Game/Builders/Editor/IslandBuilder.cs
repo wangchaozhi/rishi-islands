@@ -284,6 +284,7 @@ namespace Rishi.Builders
             MarineBuilder.Build(terrain, FindBeachSpawn(terrain));
 
             BakeNavMesh();
+            BeastBuilder.Place(terrain, FindBeachSpawn(terrain), Cycle); // 野猪、椰子蟹（白天 / 夜里蚀化）
 
             var wildlife = new GameObject("Wildlife").AddComponent<WildlifeDirector>(); // 运行时通过 GameSignals 找玩家
             wildlife.config = ConfigAssets.Wildlife;
