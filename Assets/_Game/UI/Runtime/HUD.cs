@@ -46,6 +46,7 @@ namespace Rishi.UI
             float cx = Screen.width / 2f, cy = Screen.height / 2f;
 
             DrawUnderwaterOverlay();
+            DrawFearOverlay();
             DrawDamageOverlay();
 
             bool hideCrosshair = (player != null && player.IsSprinting) || GameSignals.InputBlocked;
@@ -144,6 +145,20 @@ namespace Rishi.UI
             string depth = GameSignals.HeadUnderwater ? $"   深度 {GameSignals.CameraDepth:0.0} 米" : "";
             GUI.Label(new Rect(x, y - 24, w + 200, 22), "氧气" + depth, labelStyle);
             GUI.color = old;
+        }
+
+        /// <summary>恐惧：视野四周的黑色暗角随恐惧加深，高恐惧时随心跳轻轻收缩。</summary>
+        void DrawFearOverlay()
+        {
+            float f = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.2f, 1f, GameSignals.Fear));
+            if (f <= 0.001f) return;
+            float pulse = 1f + 0.08f * f * Mathf.Sin(Time.time * Mathf.Lerp(5f, 8.5f, f));
+            float a = Mathf.Clamp01(f * 0.9f * pulse);
+            float grow = Mathf.Lerp(0f, 0.18f, f); // 暗角往里收
+            float gw = Screen.width * grow, gh = Screen.height * grow;
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), vignette, ScaleMode.StretchToFill, true, 0, new Color(0, 0, 0, a), 0, 0);
+            if (grow > 0.01f)
+                GUI.DrawTexture(new Rect(gw * 0.5f, gh * 0.5f, Screen.width - gw, Screen.height - gh), vignette, ScaleMode.StretchToFill, true, 0, new Color(0, 0, 0, a * 0.6f), 0, 0);
         }
 
         /// <summary>受伤：整屏闪红；生命低时四周泛起随心跳脉动的红色暗角。</summary>

@@ -64,6 +64,8 @@ namespace Rishi.Core
         public static float DamageFlash { get; set; }
         /// <summary>玩家在点燃的篝火旁（安全区）：以后的怪物不靠近。</summary>
         public static bool InSafeZone { get; set; }
+        /// <summary>恐惧值（0~1），PlayerFear 写入：黑暗里上升，光里下降。</summary>
+        public static float Fear { get; set; }
 
         // ---------- 手电筒 ----------
         /// <summary>手电筒亮着（以后的影嗣据此判断是否被光照到）。</summary>
@@ -117,6 +119,7 @@ namespace Rishi.Core
             Health = 1f;
             DamageFlash = 0f;
             InSafeZone = false;
+            Fear = 0f;
             FlashlightOn = false;
             FlashlightCharge = -1f;
             Flashlight = null;
