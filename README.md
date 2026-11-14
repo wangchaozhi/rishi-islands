@@ -4,11 +4,34 @@
 
 > 开发中的原型：目前完成了第一座岛「晨星岛」的地形、植被、昼夜、声音、剧情线和两段过场动画。
 
-| | |
-|---|---|
-| ![沙滩与沉船](Docs/images/01_spawn_wreck.jpg) | ![晨星岛航拍](Docs/images/12_aerial.jpg) |
-| ![神殿](Docs/images/03_temple_far.jpg) | ![林下灌丛](Docs/images/13_undergrowth.jpg) |
-| ![夜月](Docs/images/15_moon_night.jpg) | ![清晨残月](Docs/images/16_morning_moon.jpg) |
+
+## 项目截图
+
+图片来自[知乎项目介绍](https://zhuanlan.zhihu.com/p/2095587014066419269)。
+
+**沙滩与沉船**
+
+![沙滩与沉船](docs/images/zhihu/2095587014066419269-01.jpg)
+
+**晨星岛全貌**
+
+![晨星岛全貌](docs/images/zhihu/2095587014066419269-02.jpg)
+
+**丛林神殿**
+
+![丛林神殿](docs/images/zhihu/2095587014066419269-03.jpg)
+
+**林下灌丛**
+
+![林下灌丛](docs/images/zhihu/2095587014066419269-04.jpg)
+
+**夜晚**
+
+![夜晚](docs/images/zhihu/2095587014066419269-05.jpg)
+
+**清晨**
+
+![清晨](docs/images/zhihu/2095587014066419269-06.jpg)
 
 ## 特性
 
